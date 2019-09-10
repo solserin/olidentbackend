@@ -16,3 +16,26 @@ use Illuminate\Http\Request;
 /*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });*/
+
+//obtiene las rutas de recurso del controlados User\UserController
+Route::resource('usuarios', 'User\UserController',['only'=>['index','show']]);
+
+
+
+//obtiene las rutas de recurso del controlados User\RolesController
+Route::resource('roles', 'User\RolesController',['only'=>['index','show']]);
+
+
+
+//obtiene las rutas de recurso del controlados User\GruposController
+Route::resource('grupos', 'User\GruposController',['only'=>['index','show']]);
+
+
+
+//obtiene las rutas de recurso del controlados User\ModulosController
+Route::resource('modulos', 'User\ModulosController',['only'=>['index','show']]);
+
+
+
+//obtiene las rutas de recurso del controlados User\PermisosController
+Route::resource('permisos', 'User\PermisosController',['only'=>['index','show']]);

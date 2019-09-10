@@ -10,6 +10,8 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+    const USUARIO_ACTIVO="1";
+    const USUARIO_NO_ACTIVO="0";
     /**
      * The attributes that are mass assignable.
      *
@@ -36,4 +38,13 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+    public function estaActivo(){
+        return $this->status==User::USUARIO_ACTIVO;
+    }
+
+    public function roles(){
+        return $this->hasOne('App\Roles','roles_id','id');
+    }
 }
