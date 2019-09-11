@@ -3,15 +3,17 @@
 namespace App\Exceptions;
 
 use Exception;
+use BadMethodCallException;
 use App\Traits\ApiResponser;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -91,8 +93,35 @@ class Handler extends ExceptionHandler
             return $this->errorResponse($exception->getMessage(),$exception->getStatusCode());
         }
 
-    
-        return parent::render($request, $exception);
+         //con esto validamos si el metodo llamado existe
+         if($exception instanceof BadMethodCallException){
+            return $this->errorResponse('El metodo solicitado no existe',500);
+        }
+
+        
+
+         //,manejando query exceptions
+         if($exception instanceof QueryException){
+             $codigo_error=$exception->errorInfo[1];
+             if($codigo_error==1451){
+                 return $this->errorResponse('No se puede eliminar de forma permanente el recurso porque esta relacionado con algun otro.',409);
+             }
+            
+        }
+
+        //manejando fallas inesperadas como por ejemplo problemas con el server
+        //si la aplicacion esta en modo de depuracion mostramos el mensaje original con los datos del error y si
+        //no mandamos el mensaje de error con json
+        if(config('app.debug')){
+            //mensaje original de laravel   
+            return parent::render($request, $exception);
+        }
+
+
+        return $this->errorResponse('Falla inesperada del servidor',500);
+        
+
+       
     }
 
 
