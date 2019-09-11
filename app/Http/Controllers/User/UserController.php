@@ -22,11 +22,8 @@ class UserController extends ApiController
     
     public function index()
     {
-        $auth = new Roles();
-        $auth=$auth->roles_modulos_permisos(1);
-        return $this->showAll($auth);
+       
     }
-
 
     /**
      * Show the form for creating a new resource.
