@@ -105,9 +105,6 @@ class Handler extends ExceptionHandler
             return redirect()->back()->withInput($request->input());
         }
 
-
-        
-
          //,manejando query exceptions
          if($exception instanceof QueryException){
              $codigo_error=$exception->errorInfo[1];
@@ -116,6 +113,8 @@ class Handler extends ExceptionHandler
              }
             
         }
+
+        
 
         //manejando fallas inesperadas como por ejemplo problemas con el server
         //si la aplicacion esta en modo de depuracion mostramos el mensaje original con los datos del error y si
@@ -150,7 +149,8 @@ class Handler extends ExceptionHandler
     {
         $errors=$e->validator->errors()->getMessages();
         if($this->isFronted($request)){
-            return $request->ajax() ? response()->json($errors,422) : redirect()->back()
+            return $request->ajax() ? response()->json($errors,422) : redirect()
+            ->back()
             ->withInput($request->input())
             ->withErrors($errors);
         }

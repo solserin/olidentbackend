@@ -14,10 +14,19 @@ class UserController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    } 
+    
     public function index()
     {
-        
+        $auth = new Roles();
+        $auth=$auth->roles_modulos_permisos(1);
+        return $this->showAll($auth);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -46,9 +55,9 @@ class UserController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $usuario)
     {
-        
+        return $this->showOne($usuario);
     }
 
     /**

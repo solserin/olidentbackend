@@ -17,49 +17,12 @@ use Illuminate\Http\Request;
     return $request->user();
 });*/
 
+
+Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
+
 //obtiene las rutas de recurso del controlados User\UserController
 Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
 Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store']]);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//obtiene las rutas de recurso del controlados User\RolesController
-Route::resource('roles', 'User\RolesController',['only'=>['index','show']]);
-
-
-
-//obtiene las rutas de recurso del controlados User\GruposController
-Route::resource('grupos', 'User\GruposController',['only'=>['index','show']]);
-
-
-
-//obtiene las rutas de recurso del controlados User\ModulosController
-Route::resource('modulos', 'User\ModulosController',['only'=>['index','show']]);
-
-
-
-//obtiene las rutas de recurso del controlados User\PermisosController
-Route::resource('permisos', 'User\PermisosController',['only'=>['index','show']]);
