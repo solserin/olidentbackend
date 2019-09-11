@@ -12,6 +12,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
@@ -98,6 +99,13 @@ class Handler extends ExceptionHandler
             return $this->errorResponse('El metodo solicitado no existe',500);
         }
 
+        //con esto validamos si la sesion ha expirado o si la peticcion viente de una direccion no confiable
+        if($exception instanceof TokenMismatchException){
+            //regresamos a la direccion anterior con la informacion necesaria y de manera segura
+            return redirect()->back()->withInput($request->input());
+        }
+
+
         
 
          //,manejando query exceptions
@@ -119,16 +127,21 @@ class Handler extends ExceptionHandler
 
 
         return $this->errorResponse('Falla inesperada del servidor',500);
-        
-
        
     }
 
+
+    private function isFronted($request){
+        return $request->acceptsHtml() && collect($request->route()->middleware())->contains('web');
+    }
 
 
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
+        if($this->isFronted($request)){
+            return redirect()->guest('login');
+        }
         return $this->errorResponse('No autenticado',401);
     }
 
@@ -136,6 +149,11 @@ class Handler extends ExceptionHandler
     protected function convertValidationExceptionToResponse(ValidationException $e, $request)
     {
         $errors=$e->validator->errors()->getMessages();
+        if($this->isFronted($request)){
+            return $request->ajax() ? response()->json($errors,422) : redirect()->back()
+            ->withInput($request->input())
+            ->withErrors($errors);
+        }
         return $this->errorResponse($errors,422);
     }
 }

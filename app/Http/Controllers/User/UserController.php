@@ -48,6 +48,7 @@ class UserController extends ApiController
      */
     public function show($id)
     {
+        
     }
 
     /**
