@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UsersTableSeeder extends Seeder
 {
@@ -13,23 +15,16 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        $data=[
-            [
+        //llena la tabla con 100 usuarios
+        $roles = [1, 2, 3, 4, 5];
+        for($x=0;$x<100;$x++){
+            DB::table('users')->insert([
                 'name'=>str::random(25),
-                'email'=>'hcruz@solserin.com',
-                'password'=>bcrypt('secret'),
+                'email'=>str::random(10).'@solserin.com',
+                'password'=>Hash::make('secret'),
                 'created_at'=>now(),
                 'telefono'=>str::random(10),
-                'roles_id'=>1
-            ]
-        ];
-        foreach($data as $dato){
-            DB::table('users')->insert([
-                'name' => $dato['name'],
-                'email' => $dato['email'],
-                'password' => $dato['password'],
-                'telefono'=> $dato['telefono'],
-                'roles_id'=> $dato['roles_id'],
+                'roles_id'=>Arr::random($roles)
             ]);
         }
     }

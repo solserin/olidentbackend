@@ -25,12 +25,12 @@ class RolesPermisosTableSeeder extends Seeder
             ],
             [
                 'modulos_id'=>1,
-                'permisos_id'=>2,
+                'permisos_id'=>3,
                 'roles_id'=>1,
             ],
             [
                 'modulos_id'=>1,
-                'permisos_id'=>2,
+                'permisos_id'=>4,
                 'roles_id'=>1,
             ],
 
@@ -46,12 +46,12 @@ class RolesPermisosTableSeeder extends Seeder
             ],
             [
                 'modulos_id'=>2,
-                'permisos_id'=>2,
+                'permisos_id'=>3,
                 'roles_id'=>1,
             ],
             [
                 'modulos_id'=>2,
-                'permisos_id'=>2,
+                'permisos_id'=>4,
                 'roles_id'=>1,
             ],
            

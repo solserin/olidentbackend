@@ -39,12 +39,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    
 
     public function estaActivo(){
         return $this->status==User::USUARIO_ACTIVO;
     }
 
-    public function roles(){
-        return $this->hasOne('App\Roles','roles_id','id');
+
+
+    //relaciones con otras tablas
+
+    //un usuario puede tener solo un  rol (roles)
+    public function rol(){
+        return $this->belongsTo('App\Roles','roles_id','id');
     }
+
 }

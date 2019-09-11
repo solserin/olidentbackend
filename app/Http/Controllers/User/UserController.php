@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\User;
 
+use App\User;
+use App\Roles;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 
-class UserController extends Controller
+class UserController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -14,9 +16,11 @@ class UserController extends Controller
      */
     public function index()
     {
-   
-
+        $auth = new Roles();
+        $auth=$auth->roles_modulos_permisos(1);
+        return $this->showAll($auth);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -47,7 +51,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        return $this->showOne(User::findOrFail($id));
     }
 
     /**
@@ -82,5 +86,14 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+
+    //regresa los datos para crear la intefaz de modulos del usuario
+    public function loadPerfil($id_user=1)
+    {
+        $auth = new Roles();
+        return $this->showAll($auth->roles_modulos_permisos($id_user));
     }
 }

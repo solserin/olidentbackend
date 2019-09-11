@@ -18,7 +18,31 @@ use Illuminate\Http\Request;
 });*/
 
 //obtiene las rutas de recurso del controlados User\UserController
-Route::resource('usuarios', 'User\UserController',['only'=>['index','show']]);
+Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
+Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store']]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
