@@ -22,7 +22,7 @@ class UserController extends ApiController
     
     public function index()
     {
-       
+       return 1;
     }
 
     /**

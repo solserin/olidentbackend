@@ -31,6 +31,8 @@ class Roles extends Model
             'users.email',
             'grupos.grupo', 
             'roles.rol',
+            'modulos.id as modulo_id',
+            'grupos.id as grupo_id',
             'modulos.modulo',
             'modulos.name',
             'modulos.url',
