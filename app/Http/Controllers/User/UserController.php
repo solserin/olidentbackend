@@ -101,12 +101,9 @@ class UserController extends ApiController
         return $this->showAll($auth->roles_modulos_permisos($id_user));
     }
 
-    //obtiene los datos de un usuario por medio del email
-    public function get_user_by_token($token='')
-    {
-        $auth = new Roles();
-        return $this->showOne($auth->get_user_by_token($token));
-    }
-
-
+     //regresa de un usuario por email
+     public function getUserByEmail($email='')
+     {
+        return $this->showOne(User::where('status', 1)->where('email',$email)->first(['id','email']));
+     }
 }
