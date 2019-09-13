@@ -44,6 +44,24 @@ class Roles extends Model
         return $data;
     }
 
+     //regresa todos los datos por filtro de token
+     public function get_user_by_token($token=''){
+        $data=DB::table('users')
+        ->join('oauth_access_tokens', 'users.id', '=', 'oauth_access_tokens.user_id')
+        ->select(
+            'users.id',
+            'users.email'
+        )
+        ->where(
+            [
+                'oauth_access_tokens.id'=>$token,
+                'users.status'=>1
+            ]
+        )
+        ->get();
+        return $data;
+    }
+
 
 
 

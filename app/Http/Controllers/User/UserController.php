@@ -6,6 +6,7 @@ use App\User;
 use App\Roles;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\ApiController;
+use App\User as AppUser;
 
 class UserController extends ApiController
 {
@@ -94,9 +95,18 @@ class UserController extends ApiController
 
 
     //regresa los datos para crear la intefaz de modulos del usuario
-    public function loadPerfil($id_user=1)
+    public function loadPerfil($id_user=0)
     {
         $auth = new Roles();
         return $this->showAll($auth->roles_modulos_permisos($id_user));
     }
+
+    //obtiene los datos de un usuario por medio del email
+    public function get_user_by_token($token='')
+    {
+        $auth = new Roles();
+        return $this->showOne($auth->get_user_by_token($token));
+    }
+
+
 }

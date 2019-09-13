@@ -22,6 +22,7 @@ Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenContro
 
 //obtiene las rutas de recurso del controlados User\UserController
 Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
+Route::get('usuarios/user_token/{token}', 'User\UserController@get_user_by_token');
 Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store']]);
 
 
