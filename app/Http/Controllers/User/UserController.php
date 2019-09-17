@@ -23,7 +23,8 @@ class UserController extends ApiController
     
     public function index()
     {
-       return 1;
+        return $this->showAllPaginated(Roles::select(['id','rol'])->withCount('usuarios')->orderBy('id','desc')->get());
+        //return $this->showAllPaginated(Roles::select('id','rol')->get());
     }
 
     /**

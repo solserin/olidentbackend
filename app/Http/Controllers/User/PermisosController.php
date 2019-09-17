@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Api\ApiController;
+use App\Permisos;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class PermisosController extends Controller
+class PermisosController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +16,7 @@ class PermisosController extends Controller
      */
     public function index()
     {
-        //
+        return $this->showAll(Permisos::orderBy('id','asc')->get());
     }
 
     /**

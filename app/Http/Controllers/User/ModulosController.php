@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Api\ApiController;
+use App\Modulos;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class ModulosController extends Controller
+class ModulosController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +16,7 @@ class ModulosController extends Controller
      */
     public function index()
     {
-        //
+        return $this->showAll(Modulos::orderBy('id','asc')->get());
     }
 
     /**
