@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
+use App\Roles;
 
-class RolesController extends Controller
+class RolesController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -27,6 +28,8 @@ class RolesController extends Controller
         //
     }
 
+
+    
     /**
      * Store a newly created resource in storage.
      *
@@ -35,7 +38,23 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+       //validacion de datos para el nuevo usuario
+       request()->validate(
+          [
+            'rol' => 'required|unique:roles',
+            'itemsPermisos' => 'required'
+          ],
+          [
+            'rol.required' => 'Ingrese una descripción para el nuevo rol.',
+            'rol.unique' => 'Este rol ya ha sido registrado, debe ingresar uno diferente.',
+            'itemsPermisos.required' => 'Debe seleccionar al menos un permiso para este rol.'
+          ]
+        );
+
+        //aqui guardo el rol nuevo
+        $obj = new Roles();
+        $resultado=$obj->guardar_rol($request);
+        return $resultado;
     }
 
     /**

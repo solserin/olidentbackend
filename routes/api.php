@@ -26,6 +26,10 @@ Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
 Route::get('usuarios/user_email/{email}', 'User\UserController@getUserByEmail');
 Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store']]);
 
+
+//rutas de roles
+Route::resource('roles', 'User\RolesController',['only'=>['index','show','store']]);
+
 //rutas de permisos
 Route::resource('permisos', 'User\PermisosController',['only'=>['index','show','store']]);
 

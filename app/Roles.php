@@ -2,8 +2,10 @@
 
 namespace App;
 
+use Hamcrest\Type\IsNumeric;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 
 class Roles extends Model
@@ -43,6 +45,35 @@ class Roles extends Model
         ->where('users.id','=',$id_user)
         ->get();
         return $data;
+    }
+
+    //aqui guardo los datos y permisos del nuevo rol
+    public function guardar_rol(Request $request){
+        try {
+            DB::beginTransaction();
+            $rol_id=DB::table('roles')->insertGetId(['rol' =>$request->rol]);
+            $id_modulo=0;
+            $id_permiso=0;
+            $valores="";
+            foreach($request->itemsPermisos as $item){
+                $valores=explode(",", $item);
+                $id_modulo=$valores[0];
+                $id_permiso=$valores[1];
+                //sacando el valor del modulo
+                DB::table('roles_permisos')->insert(
+                    [
+                         'modulos_id' => (int)($id_modulo),
+                         'permisos_id' =>(int)($id_permiso),
+                         'roles_id' => $rol_id
+                    ]
+                );
+            }
+            DB::commit();
+            return $rol_id;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return 0;
+        }
     }
 
 }
