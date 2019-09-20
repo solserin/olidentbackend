@@ -4,9 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\User;
 use App\Roles;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Api\ApiController;
 use App\User as AppUser;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
+use App\Http\Controllers\Api\ApiController;
 
 class UserController extends ApiController
 {
@@ -23,7 +24,7 @@ class UserController extends ApiController
     
     public function index()
     {
-        return $this->showAllPaginated(Roles::select(['id','rol'])->withCount('usuarios')->orderBy('id','desc')->get());
+        
     }
 
     /**

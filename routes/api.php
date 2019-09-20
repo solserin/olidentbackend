@@ -28,13 +28,13 @@ Route::resource('usuarios', 'User\UserController',['only'=>['index','show','stor
 
 
 //rutas de roles
-Route::resource('roles', 'User\RolesController',['only'=>['index','show','store']]);
+Route::resource('roles', 'User\RolesController',['only'=>['index','show','store','update','destroy']]);
 
 //rutas de permisos
 Route::resource('permisos', 'User\PermisosController',['only'=>['index','show','store']]);
 
 //rutas de modulos
-Route::resource('modulos', 'User\ModulosController',['only'=>['index','show','store']]);
+Route::resource('modulos', 'User\ModulosController',['only'=>['index','show','destroy']]);
 
 
 

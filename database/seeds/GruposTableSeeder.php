@@ -14,10 +14,6 @@ class GruposTableSeeder extends Seeder
     {
         $data=[
             [
-                'grupo'=>'Ninguno',
-                'icon'=>'icon-speedometer'
-            ],
-            [
                 'grupo'=>'Usuarios',
                 'icon'=>'icon-speedometer'
             ],

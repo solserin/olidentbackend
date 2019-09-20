@@ -19,6 +19,10 @@ class Roles extends Model
         return $this->hasMany('App\User','roles_id','id');
     }
 
+    //aqui obtengo los ids de los permisos que le corresponden a cada rol para modificar un rol
+    public function get_permisos_de_rol($id){
+        return DB::table('roles_permisos')->where('roles_id',$id)->get();
+    }
 
 
     //regresa todos los datos para crear la interfaz de un usuario
@@ -40,6 +44,7 @@ class Roles extends Model
             'modulos.name',
             'modulos.url',
             'modulos.icon',
+            'permisos.id as permiso_id',
             'permisos.permiso'
         )
         ->where('users.id','=',$id_user)
@@ -76,5 +81,46 @@ class Roles extends Model
         }
     }
 
-}
 
+    //actualizo un rol con esta funcion
+     public function update_rol(Request $request,$id){
+        try {
+            DB::beginTransaction();
+            DB::table('roles_permisos')->where('roles_id', '=', $request->id_rol)->delete();
+            DB::table('roles')->where('id',$request->id_rol)->update(['rol' => $request->rol]);
+            $id_modulo=0;
+            $id_permiso=0;
+            $valores="";
+            foreach($request->itemsPermisos as $item){
+                $valores=explode(",", $item);
+                $id_modulo=$valores[0];
+                $id_permiso=$valores[1];
+                //sacando el valor del modulo
+                DB::table('roles_permisos')->insert(
+                    [
+                         'modulos_id' => (int)($id_modulo),
+                         'permisos_id' =>(int)($id_permiso),
+                         'roles_id' => $id
+                    ]
+                );
+            }
+            DB::commit();
+            return $id;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return 0;
+        }
+    }
+
+
+     //aqui elimino el rol
+     public function delete_rol($id){
+        try {
+            DB::table('roles')->where('id', '=', $id)->update(['status'=>0]);
+            return $id;
+        } catch (\Throwable $th) {
+            return -1;
+        }
+    }
+
+}

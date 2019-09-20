@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RolesTableSeeder extends Seeder
 {
@@ -12,7 +13,7 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
-        $roles=[
+        /*$roles=[
             'Administrador',
             'Recepcionista',
             'Cobrador',
@@ -24,5 +25,14 @@ class RolesTableSeeder extends Seeder
             'rol' => $rol
           ]);  
         }
+      */
+        
+        for($x=0;$x<500;$x++){
+            DB::table('roles')->insert([
+                'rol'=>str::random(15),
+            ]);
+        }
+
+
     }
 }

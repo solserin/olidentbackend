@@ -15,16 +15,16 @@ class ModulosTableSeeder extends Seeder
             [
                 'modulo'=>'Roles de Usuarios',
                 'name'=>'Roles',
-                'url'=>'Roles de Usuarios',
+                'url'=>'/usuarios/roles',
                 'icon'=>'icon-speedometer',
-                'grupos_id'=>2
+                'grupos_id'=>1
             ],
             [
                 'modulo'=>'Usuarios',
                 'name'=>'Usuarios',
-                'url'=>'/',
+                'url'=>'/usuarios',
                 'icon'=>'icon-speedometer',
-                'grupos_id'=>2
+                'grupos_id'=>1
             ],
         ];
         foreach($data as $dato){
