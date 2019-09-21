@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Roles;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Input;
@@ -10,6 +11,11 @@ use App\Http\Controllers\Api\ApiController;
 
 class RolesController extends ApiController
 {
+
+  public function __construct()
+    {
+        $this->middleware('auth:api');
+    } 
     /**
      * Display a listing of the resource.
      *
@@ -110,5 +116,12 @@ class RolesController extends ApiController
           return $resultado;
         }
         return $res;
+    }
+
+
+    public function get_reporte_roles(){
+      $data=Roles::select(['id','rol'])->with('usuarios')->withCount('usuarios')->where('status', '=','1')->orderBy('id','asc')->get();
+      $pdf = PDF::loadView('roles/roles',['roles'=>$data]);
+      return $pdf->stream();
     }
 }

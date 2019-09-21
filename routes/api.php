@@ -28,6 +28,8 @@ Route::resource('usuarios', 'User\UserController',['only'=>['index','show','stor
 
 
 //rutas de roles
+//reporte de todos los roles
+Route::get('roles_reporte', 'User\RolesController@get_reporte_roles');
 Route::resource('roles', 'User\RolesController',['only'=>['index','show','store','update','destroy']]);
 
 //rutas de permisos
@@ -35,6 +37,5 @@ Route::resource('permisos', 'User\PermisosController',['only'=>['index','show','
 
 //rutas de modulos
 Route::resource('modulos', 'User\ModulosController',['only'=>['index','show','destroy']]);
-
 
 
