@@ -118,10 +118,15 @@ class RolesController extends ApiController
         return $res;
     }
 
-
     public function get_reporte_roles(){
       $data=Roles::select(['id','rol'])->with('usuarios')->withCount('usuarios')->where('status', '=','1')->orderBy('id','asc')->get();
       $pdf = PDF::loadView('roles/roles',['roles'=>$data]);
       return $pdf->stream();
+    }
+
+    //obtengo los roles que existen
+    public function get_roles()
+    {
+        return $this->showAll(Roles::select(['id','rol'])->where('status', '=','1')->orderBy('id','asc')->get());
     }
 }

@@ -14,12 +14,16 @@ class GruposTableSeeder extends Seeder
     {
         $data=[
             [
+                'grupo'=>'Empresa',
+                'icon'=>'icon-wrench'
+            ],
+            [
                 'grupo'=>'Usuarios',
-                'icon'=>'icon-speedometer'
+                'icon'=>'icon-people'
             ],
             [
                 'grupo'=>'Pólizas',
-                'icon'=>'icon-speedometer'
+                'icon'=>'icon-folder-alt'
             ]
         ];
         foreach($data as $dato){

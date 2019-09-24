@@ -24,16 +24,24 @@ Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenContro
 Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
 //obitiene los datos del usuario por email
 Route::get('usuarios/user_email/{email}', 'User\UserController@getUserByEmail');
-Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store']]);
+Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store','update','destroy']]);
 
 
 //rutas de roles
 //reporte de todos los roles
 Route::get('roles_reporte', 'User\RolesController@get_reporte_roles');
+//obtengo la lista de roles
+Route::get('roles/get_roles', 'User\RolesController@get_roles');
 Route::resource('roles', 'User\RolesController',['only'=>['index','show','store','update','destroy']]);
+
+
 
 //rutas de permisos
 Route::resource('permisos', 'User\PermisosController',['only'=>['index','show','store']]);
+
+
+//rutas de empresas
+Route::resource('empresas', 'EmpresasController',['only'=>['show','update']]);
 
 //rutas de modulos
 Route::resource('modulos', 'User\ModulosController',['only'=>['index','show','destroy']]);

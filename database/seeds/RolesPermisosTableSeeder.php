@@ -13,6 +13,7 @@ class RolesPermisosTableSeeder extends Seeder
     public function run()
     {
         $data=[
+            //empresa
             [
                 'modulos_id'=>1,
                 'permisos_id'=>1,
@@ -29,28 +30,49 @@ class RolesPermisosTableSeeder extends Seeder
                 'roles_id'=>1,
             ],
             [
-                'modulos_id'=>1,
+                'modulos_id'=>2,
+                'permisos_id'=>4,
+                'roles_id'=>1,
+            ],
+            //usuarios
+            [
+                'modulos_id'=>2,
+                'permisos_id'=>1,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>2,
+                'permisos_id'=>2,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>2,
+                'permisos_id'=>3,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>2,
                 'permisos_id'=>4,
                 'roles_id'=>1,
             ],
 
             [
-                'modulos_id'=>2,
+                'modulos_id'=>3,
                 'permisos_id'=>1,
                 'roles_id'=>1,
             ],
             [
-                'modulos_id'=>2,
+                'modulos_id'=>3,
                 'permisos_id'=>2,
                 'roles_id'=>1,
             ],
             [
-                'modulos_id'=>2,
+                'modulos_id'=>3,
                 'permisos_id'=>3,
                 'roles_id'=>1,
             ],
             [
-                'modulos_id'=>2,
+                'modulos_id'=>3,
                 'permisos_id'=>4,
                 'roles_id'=>1,
             ],

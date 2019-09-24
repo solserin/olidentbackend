@@ -13,18 +13,25 @@ class ModulosTableSeeder extends Seeder
     {
         $data=[
             [
+                'modulo'=>'Información',
+                'name'=>'empresa',
+                'url'=>'/empresa',
+                'icon'=>'icon-home',
+                'grupos_id'=>1
+            ],
+            [
                 'modulo'=>'Roles de Usuarios',
                 'name'=>'Roles',
                 'url'=>'/usuarios/roles',
-                'icon'=>'icon-speedometer',
-                'grupos_id'=>1
+                'icon'=>'icon-people',
+                'grupos_id'=>2
             ],
             [
                 'modulo'=>'Usuarios',
                 'name'=>'Usuarios',
                 'url'=>'/usuarios',
-                'icon'=>'icon-speedometer',
-                'grupos_id'=>1
+                'icon'=>'icon-user',
+                'grupos_id'=>2
             ],
         ];
         foreach($data as $dato){

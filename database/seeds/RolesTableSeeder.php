@@ -13,7 +13,7 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
-        /*$roles=[
+        $roles=[
             'Administrador',
             'Recepcionista',
             'Cobrador',
@@ -25,14 +25,13 @@ class RolesTableSeeder extends Seeder
             'rol' => $rol
           ]);  
         }
-      */
         
-        for($x=0;$x<500;$x++){
+       /* for($x=0;$x<500;$x++){
             DB::table('roles')->insert([
                 'rol'=>str::random(15),
             ]);
         }
-
+*/
 
     }
 }

@@ -40,6 +40,7 @@ class Roles extends Model
             'roles.rol',
             'modulos.id as modulo_id',
             'grupos.id as grupo_id',
+            'grupos.icon as grupo_icon',
             'modulos.modulo',
             'modulos.name',
             'modulos.url',

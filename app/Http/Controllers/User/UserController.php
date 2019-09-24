@@ -6,6 +6,8 @@ use App\User;
 use App\Roles;
 use App\User as AppUser;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Api\ApiController;
 
@@ -24,7 +26,9 @@ class UserController extends ApiController
     
     public function index()
     {
-        
+        $key = Input::get('filter');
+        //return $key;
+        return $this->showAllPaginated(User::with('rol')->select(['created_at','id','name','email','roles_id','status'])->where('name', 'like', '%'.$key.'%')->orderBy('id','desc')->get());
     }
 
     /**
@@ -45,7 +49,29 @@ class UserController extends ApiController
      */
     public function store(Request $request)
     {
-        //
+        //validacion de datos para el nuevo usuario
+       request()->validate(
+        [
+          'nombre' => 'required',
+          'usuario' => 'required|email|unique:users,email',
+          'rol_id' => 'required',
+          'estado' => 'required',
+          'password' => 'required',
+          'password_repetir' => 'required|same:password',
+        ],
+        [
+          'required' => 'Este dato es obligatorio.',
+          'email' => 'Debe ingresar un email',
+          'unique' => 'Ya existe un usuario con este email, ingrese uno diferente.',
+          'same' => 'Las contraseñas ingresadas no coinciden.'
+        ]
+      );
+
+      //aqui guardo el rol nuevo
+      $obj = new User();
+      $resultado=$obj->guardar_usuario($request);
+      return $resultado;
+
     }
 
     /**
@@ -54,21 +80,11 @@ class UserController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(User $usuario)
+    public function show($id)
     {
-        return $this->showOne($usuario);
+        return $this->showOne(User::select('id','name','password','email','telefono','roles_id','status')->where('id', $id)->first());
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -79,7 +95,25 @@ class UserController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        //
+       //validacion de datos para el nuevo usuario
+       request()->validate(
+            [
+                'usuario_id' => 'required', 
+                'nombre' => 'required',
+                'usuario' => ['email','required',Rule::unique('users','email')->ignore($id)],
+                'rol_id' => 'required',
+                'estado' => 'required',
+            ],
+            [
+                'required' => 'Este dato es obligatorio.',
+                'email' => 'Debe ingresar un email',
+                'unique' => 'Ya existe un usuario con este email, ingrese uno diferente.'
+            ]
+        );
+        //aqui actualizo el usuario
+        $obj = new User();
+        $resultado=$obj->update_usuario($request,$id);
+        return $resultado;
     }
 
     /**
@@ -90,7 +124,10 @@ class UserController extends ApiController
      */
     public function destroy($id)
     {
-        //
+           //se puede eliminar
+           $obj = new User();
+           $resultado=$obj->delete_user($id);
+           return $resultado;
     }
 
 
