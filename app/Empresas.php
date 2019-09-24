@@ -14,9 +14,9 @@ class Empresas extends Model
     //actualizo los datos de la empresa
     public function update_empresa(Request $request,$id){
         try {
-            DB::table('empresas')->where('id',$request->id_empresa)->update(
+            DB::table('empresas')->where('id',$request->id)->update(
                 [
-                    'logo' => $request->imagen,
+                    'logo' => $request->logo,
                     'nombre' => $request->nombre,
                     'representante' => $request->representante,
                     'email' => $request->email,

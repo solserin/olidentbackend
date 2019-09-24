@@ -79,7 +79,7 @@ class EmpresasController extends ApiController
         //validacion de datos para el nuevo usuario
        request()->validate(
         [
-          'imagen' => 'required|image',
+          'logo' => 'required|image64:jpeg,jpg,png',
           'nombre' => 'required',
           'representante' => 'required',
           'email' => 'required|email',
@@ -93,7 +93,8 @@ class EmpresasController extends ApiController
         ],
         [
           'required' => 'Este dato es obligatorio.',
-          'email' => 'Debe ingresar un email',
+          'email' => 'Debe ingresar un email en formato válido.',
+          'image64'=>'El logotipo debe ser una imagen (png, jpg, jpeg).'
         ]
       );
      
