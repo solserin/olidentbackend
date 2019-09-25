@@ -12,11 +12,15 @@ class EmpresasTableSeeder extends Seeder
      */
     public function run()
     {
+        $path =  public_path('images/logo.png');
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         DB::table('empresas')->insert([
             'nombre' => 'Clínica Dental Oli Dent',
             'representante' => 'Dra. Cynthia Oliva López Martínez - Cirujano Dentista - U.A.S',
             'email' => 'olident.salud@gmail.com',
-            'logo' => '',
+            'logo' => $base64,
             'telefono' => '6691 930497',
             'calle' => 'Francisco I Madero',
             'numero'=>'407',

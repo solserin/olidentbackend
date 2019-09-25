@@ -52,6 +52,7 @@ class EmpresasController extends ApiController
      */
     public function show($id)
     {
+        //return base64_encode(file_get_contents(public_path('images/profile.png')));
         //le paso el 1 directo porque solo me interesa el numero 1
         return $this->showOne(Empresas::where('id', 1)->first());
     }

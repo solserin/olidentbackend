@@ -8,6 +8,7 @@ use App\User as AppUser;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Api\ApiController;
 
@@ -28,7 +29,7 @@ class UserController extends ApiController
     {
         $key = Input::get('filter');
         //return $key;
-        return $this->showAllPaginated(User::with('rol')->select(['created_at','id','name','email','roles_id','status'])->where('name', 'like', '%'.$key.'%')->orderBy('id','desc')->get());
+        return $this->showAllPaginated(User::with('rol')->select(['imagen','created_at','id','name','email','roles_id','status'])->where('name', 'like', '%'.$key.'%')->orderBy('id','desc')->get());
     }
 
     /**
@@ -66,7 +67,7 @@ class UserController extends ApiController
           'same' => 'Las contraseñas ingresadas no coinciden.'
         ]
       );
-
+     
       //aqui guardo el rol nuevo
       $obj = new User();
       $resultado=$obj->guardar_usuario($request);
@@ -142,6 +143,33 @@ class UserController extends ApiController
      //regresa de un usuario por email
      public function getUserByEmail($email='')
      {
-        return $this->showOne(User::where('status', 1)->where('email',$email)->first(['id','email']));
+        return $this->showOne(User::where('status', 1)->where('email',$email)->first(['id','email','imagen','name','telefono','updated_at']));
+     }
+
+
+
+     //aqui el usuario modifca su propio perfil
+     public function update_perfil(Request $request,$id)
+     {
+        request()->validate(
+             [
+                 'imagen' => 'required|image64:jpeg,jpg,png',
+                 'id' => 'required', 
+                 'nombre' => 'required',
+                 'password'=>'sometimes|same:password_repetir',
+                 'password_repetir'=>'sometimes|same:password',
+                 'verificar_usuario' => 'required',
+             ],
+             [
+                'image64'=>'El logotipo debe ser una imagen (png, jpg, jpeg).',
+                'required' => 'Este dato es obligatorio.',
+                'same' => 'Las nuevas contraseñas no coinciden',
+                'image64'=>'El logotipo debe ser una imagen (png, jpg, jpeg).'
+            ]
+         );
+         //aqui actualizo el usuario
+         $obj = new User();
+         $resultado=$obj->update_perfil($request,$id);
+         return $resultado;
      }
 }

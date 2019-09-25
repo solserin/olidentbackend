@@ -24,6 +24,7 @@ Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenContro
 Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
 //obitiene los datos del usuario por email
 Route::get('usuarios/user_email/{email}', 'User\UserController@getUserByEmail');
+Route::put('usuarios/update_perfil/{user}', 'User\UserController@update_perfil');
 Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store','update','destroy']]);
 
 

@@ -12,11 +12,18 @@ use Illuminate\Support\Facades\Hash;
 $factory->define(App\User::class, function (Faker $faker) {
     $roles = [1, 2, 3, 4, 5];
     $estados = [1, 0];
+
+    $path =  public_path('images/profile.png');
+    $type = pathinfo($path, PATHINFO_EXTENSION);
+    $data = file_get_contents($path);
+    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
     return [
-        'name' => $faker->name,
+        'name' => strtoupper($faker->name),
         'email' => $faker->unique()->safeEmail,
         'password' => Hash::make('secret'), // secret
-        'telefono' =>  $faker->phoneNumber,
+        'telefono' =>  strtoupper($faker->phoneNumber),
+        'imagen'=>$base64,
         'created_at' => now(),
         'status' => Arr::random($estados),
         'roles_id' => Arr::random($roles),

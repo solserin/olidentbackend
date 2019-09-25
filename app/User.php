@@ -1,7 +1,6 @@
 <?php
 
 namespace App;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -72,12 +71,18 @@ class User extends Authenticatable
         try {
             date_default_timezone_set('America/Mazatlan');
             //return $request->estado;
+            $path =  public_path('images/profile.png');
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
             $user_id=DB::table('users')->insertGetId(
                 [
-                    'name' =>$request->nombre,
+                    'name' =>strtoupper($request->nombre),
                     'email' =>$request->usuario,
                     'password' =>Hash::make($request->password),
-                    'telefono' =>$request->telefono,
+                    'telefono' =>strtoupper($request->telefono),
+                    'imagen'=> $base64,
                     'roles_id' =>$request->rol_id,
                     'created_at' =>Carbon::now()->format('Y-m-d H:i:s'),
                     'status'=>$request->estado
@@ -94,11 +99,12 @@ class User extends Authenticatable
         try {
             DB::table('users')->where('id',$request->usuario_id)->update(
                 [
-                    'name' =>$request->nombre,
+                    'name' =>strtoupper($request->nombre),
                     'email' =>$request->usuario,
-                    'telefono' =>$request->telefono,
+                    'telefono' =>strtoupper($request->telefono),
                     'roles_id' =>$request->rol_id,
-                    'status'=>$request->estado
+                    'status'=>$request->estado,
+                    'updated_at' =>Carbon::now()->format('Y-m-d H:i:s'),
                 ]
             );
             return $id;
@@ -114,6 +120,48 @@ class User extends Authenticatable
             return $id;
         } catch (\Throwable $th) {
             return -1;
+        }
+    }
+
+
+
+      //actualizo el perfil del usuarios
+      public function update_perfil(Request $request,$id){
+        try {
+            //primero confirmamos que el usuario es el dueño de la cuenta
+            $user_por_id=User::select('id','email','imagen','name','telefono','updated_at','password')->where('id',$id)->first();
+            if (Hash::check($request->verificar_usuario,$user_por_id->password)) {
+                //la contraseña que ingreso es correcta y podemos continuar
+                if($request->password && $request->password_repetir){
+                    //aqui modificamos todos los datos incluido la contraseña
+                    DB::table('users')->where('id',$id)->update(
+                        [
+                            'name' => strtoupper($request->nombre),
+                            'telefono' => strtoupper($request->telefono),
+                            'imagen' => $request->imagen,
+                            'updated_at' =>Carbon::now()->format('Y-m-d H:i:s'),
+                            'password'=>Hash::make($request->password)
+                        ]
+                    );
+                }else{
+                    //solo modifico nombre, telefono e imagen
+                     //aqui modificamos todos los datos incluido la contraseña
+                     DB::table('users')->where('id',$id)->update(
+                        [
+                            'name' => strtoupper($request->nombre),
+                            'telefono' => strtoupper($request->telefono),
+                            'imagen' => $request->imagen,
+                            'updated_at' =>Carbon::now()->format('Y-m-d H:i:s'),
+                        ]
+                    );
+                }
+                return User::select('id','email','imagen','name','telefono','updated_at','password')->where('id',$id)->first();
+            }else{
+                //la contraseña de verificacion de cuenta no es correcta
+                return -1;
+            }
+        } catch (\Throwable $th) {
+            return 0;
         }
     }
 }
