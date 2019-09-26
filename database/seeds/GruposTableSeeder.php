@@ -22,8 +22,8 @@ class GruposTableSeeder extends Seeder
                 'icon'=>'icon-people'
             ],
             [
-                'grupo'=>'Pólizas',
-                'icon'=>'icon-folder-alt'
+                'grupo'=>'Catálogos',
+                'icon'=>'icon-book-open'
             ]
         ];
         foreach($data as $dato){

@@ -29,6 +29,6 @@ class UsersTableSeeder extends Seeder
         }*/
 
         //usando en seeds
-        factory('App\User', 100)->create();
+        factory('App\User', 10)->create();
     }
 }

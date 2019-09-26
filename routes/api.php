@@ -48,3 +48,17 @@ Route::resource('empresas', 'EmpresasController',['only'=>['show','update']]);
 Route::resource('modulos', 'User\ModulosController',['only'=>['index','show','destroy']]);
 
 
+
+
+//rutas de servicios
+Route::get('servicios/servicios_reporte', 'ServiciosController@get_reporte_servicios');
+Route::resource('servicios', 'ServiciosController',['only'=>['index','store','show','update','destroy']]);
+
+//rutas de tipos de servicios
+Route::get('tipos_servicios/get_tipos', 'TipoServiciosController@get_tipos');
+Route::resource('tipos_servicios', 'TipoServiciosController');
+
+
+//rutas de tipos de precio
+Route::resource('tipo_precios', 'TipoPreciosController',['only'=>['index']]);
+

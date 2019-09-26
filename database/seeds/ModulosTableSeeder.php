@@ -19,6 +19,7 @@ class ModulosTableSeeder extends Seeder
                 'icon'=>'icon-home',
                 'grupos_id'=>1
             ],
+            //usuarios
             [
                 'modulo'=>'Roles de Usuarios',
                 'name'=>'Roles',
@@ -32,6 +33,14 @@ class ModulosTableSeeder extends Seeder
                 'url'=>'/usuarios',
                 'icon'=>'icon-user',
                 'grupos_id'=>2
+            ],
+            //servicios
+            [
+                'modulo'=>'Servicios',
+                'name'=>'Servicios',
+                'url'=>'/catalogos/servicios',
+                'icon'=>'icon-basket-loaded',
+                'grupos_id'=>3
             ],
         ];
         foreach($data as $dato){
