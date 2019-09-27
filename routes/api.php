@@ -56,7 +56,7 @@ Route::resource('servicios', 'ServiciosController',['only'=>['index','store','sh
 
 //rutas de tipos de servicios
 Route::get('tipos_servicios/get_tipos', 'TipoServiciosController@get_tipos');
-Route::resource('tipos_servicios', 'TipoServiciosController');
+Route::resource('tipos_servicios', 'TipoServiciosController',['only'=>['index','show','store','destroy','update']]);
 
 
 //rutas de tipos de precio

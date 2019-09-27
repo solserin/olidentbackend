@@ -11,10 +11,14 @@ use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Api\ApiController;
+use Illuminate\Support\Facades\Storage;
 
 class ServiciosController extends ApiController
 {
-    
+    public function __construct()
+    {
+        //$this->middleware('auth:api');
+    } 
     /**
      * Display a listing of the resource.
      *
@@ -36,7 +40,6 @@ class ServiciosController extends ApiController
     {
         //
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -134,11 +137,51 @@ class ServiciosController extends ApiController
     }
 
 
-    public function get_reporte_servicios(){
+    public function getB64Image($base64_image){  
+        // Obtener el String base-64 de los datos         
+        $image_service_str = substr($base64_image, strpos($base64_image, ",")+1);
+        // Decodificar ese string y devolver los datos de la imagen        
+        $image = base64_decode($image_service_str);   
+        // Retornamos el string decodificado
+        return $image; 
+     }
 
-        $servicios=TipoServicios::with('servicios')->orderBy('id','asc')->get();
-        $empresa=DB::table('empresas')->where('id',1)->get();
-        $pdf = PDF::loadView('servicios/servicios',compact('servicios','empresa'))->setPaper('a4', 'landscape');
+     public function getB64Extension($base64_image, $full=null){  
+        // Obtener mediante una expresión regular la extensión imagen y guardarla
+        // en la variable "img_extension"        
+        preg_match("/^data:image\/(.*);base64/i",$base64_image, $img_extension);   
+        // Dependiendo si se pide la extensión completa o no retornar el arreglo con
+        // los datos de la extensión en la posición 0 - 1
+        return ($full) ?  $img_extension[0] : $img_extension[1];  
+      }
+
+
+    public function get_reporte_servicios(){
+      //eliminos los archivos anteriores
+        $files=Storage::disk('images_base64')->files();
+        foreach($files as $fi)
+        {
+          Storage::disk('images_base64')->delete($fi);
+        }
+
+        $servicios=Servicios::with('tipo')->where('status',1)->orderBy('id','asc')->get();
+        $empresa=DB::table('empresas')->where('id',1)->get()->toArray();
+
+              // Obtener los datos de la imagen
+        $img = $this->getB64Image($empresa[0]->logo);
+        // Obtener la extensión de la Imagen
+        $img_extension = $this->getB64Extension($empresa[0]->logo);
+        // Crear un nombre aleatorio para la imagen
+        $img_name = 'logo'. time() . '.' . $img_extension;   
+        // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
+        // la función "put" el nombre de la imagen y los datos de la imagen como 
+        // segundo parametro
+        Storage::disk('images_base64')->put($img_name, $img);
+        $file = storage_path('app/images_base64/'.$img_name);
+
+
+        $pdf = PDF::loadView('servicios/servicios',compact('servicios','empresa','file'))->setPaper('a4', 'landscape');
+        
         return $pdf->stream('archivo.pdf');
       }
    

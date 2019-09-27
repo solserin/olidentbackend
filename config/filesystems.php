@@ -63,6 +63,13 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
         ],
+        //se agrrego para manejar imagenes de base 64 a imagen
+        'images_base64' => [
+            'driver' => 'local', //tipo driver local-nube(s3 de amazon)
+            'root' => storage_path('app/images_base64'), //ruta en la carpeta storage/app y 
+            'url' => env('APP_URL').'/storage', //ruta base storage no cambiar
+            'visibility' => 'public', //si se podra acceder desde el exterior
+        ],
 
     ],
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aloha!</title>
+<title>Reporte</title>
 
 <style type="text/css">
     * {
@@ -24,63 +24,72 @@
         font-style: italic;
         color: #8f9ba6;
     }
+    tr:nth-child(even) {background-color: #d2edf7;}
+        #datos th, #datos td {
+        border-bottom: 1px solid #ddd;
+    }
+    #datos{
+        border-collapse: collapse;
+    }
+    #datos td{ height: 14px };
 </style>
-
 </head>
 <body>
-
-  <table width="100%">
+  <table width="100%" >
     <tr>
-        <td valign="top"><img src="https://www.sitio.solserin.com/assets/images/website/logo_de_solserin.png" alt="" width="150"/></td>
+    <td valign="top"><img src='{{$file}}' alt="" width="150"/></td>
         <td align="right">
-            <h3>Clínica Dental <strong>OLI DENT</strong></h3>
+            <h3>{{$empresa[0]->nombre}}</h3>
             <h4>"Seguridad a tu Sonrisa"</h4>
             <pre style="margin-top:-10px;">
-               
-                Dra. Cynthia Oliva López Martínez - Cirujano Dentista - U.A.S
-                Francisco I Madero #407 Sur. Entre 5 de Febrero y 20 de Noviembre. Villa Unión Mazatlan.
-                Olident.salud@gmail.com
-                Tel. de Citas 6691 930497
-                Facebook. Clinica Olident
+                {{$empresa[0]->representante}}
+                {{$empresa[0]->calle}} # {{$empresa[0]->numero}} Col. {{$empresa[0]->colonia}} {{$empresa[0]->descripcion}} C.P. {{$empresa[0]->cp}} {{$empresa[0]->ciudad}}
+                {{$empresa[0]->email}}
+                Tel. de Citas {{$empresa[0]->telefono}}
             </pre>
         </td>
     </tr>
-
   </table>
-
   <table width="100%">
     <tr>
         <td><strong>Reporte:</strong> Lista de Servicios</td> 
     </tr>
-
   </table>
-
   <br/>
-
-  <table width="100%">
+  <table width="100%" id="datos">
     <thead style="background-color: lightgray;">
       <tr>
-        <th align="center">#</th>
-        <th align="center" width="75%">Servicio</th>
-        <th align="center">Tipo</th>
-        <th align="center">Precio normal</th>
+        <th align="center" width="3%">#</th>
+        <th align="center" width="30%">Servicio</th>
+        <th align="center" width="30%">Tipo</th>
+        <th align="center" width="10%">Precio normal</th>
+        <th align="center" width="10%">Precio con póliza</th>
       </tr>
     </thead>
     <tbody>
         @foreach ($servicios as $servicio)
-        @foreach ($servicio['servicios'] as $item)
             <tr>
-               
-                <td align="center">{{$item->id}}</td>
-                <td align="center">{{ucfirst(strtolower($item->servicio))}}</td>
-                <td align="center">{{ucfirst(strtolower($servicio->tipo))}}</td>
-                <td align="center">{{number_format($item->precio_normal, 2, '.', ',')}}</td>
+                <td align="center">{{$servicio->id}}</td>
+                <td align="center">{{ucfirst(mb_strtolower($servicio->servicio,'UTF-8'))}}</td>
+                <td align="center">{{ucfirst(mb_strtolower($servicio['tipo']->tipo,'UTF-8'))}}</td>
+                <td align="center">{{number_format($servicio->precio_normal,2,'.',',')}}</td>
+                <td align="center">
+                    @if ($servicio->descuento_poliza!=100)
+                        @if ($servicio->tipo_precio_id==1)
+                        @php
+                            $precio_poliza=($servicio->precio_normal*((100-$servicio->descuento_poliza)/100));
+                        @endphp
+                            {{number_format($precio_poliza,2,'.',',')}}
+                            @else
+                            Cita Previa - {{$servicio->descuento_poliza}} %
+                        @endif
+                    @else
+                        <strong>Gratis</strong>
+                    @endif
+                </td>
             </tr>
-        @endforeach
-           
         @endforeach
     </tbody>
   </table>
-
 </body>
 </html>
