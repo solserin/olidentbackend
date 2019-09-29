@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
            TiposPolizasTableSeeder::class,
            TiposVentaTableSeeder::class,
            GruposVendedoresTableSeeder::class,
+           RutasTableSeeder::class,
        ]);
     }
 }

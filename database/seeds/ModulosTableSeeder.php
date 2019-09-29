@@ -49,6 +49,13 @@ class ModulosTableSeeder extends Seeder
                 'icon'=>'icon-people',
                 'grupos_id'=>3
             ],
+            [
+                'modulo'=>'Rutas',
+                'name'=>'Rutas',
+                'url'=>'/catalogos/rutas',
+                'icon'=>'icon-location-pin',
+                'grupos_id'=>3
+            ],
             // modulos de polizas
              //servicios
              [

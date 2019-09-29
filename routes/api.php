@@ -64,7 +64,10 @@ Route::resource('tipo_precios', 'TipoPreciosController',['only'=>['index']]);
 
 
 //grupos de vendedores
-
 Route::get('grupos_vendedores/get_agregar_modificar_lista', 'GruposVendedoresController@get_agregar_modificar_lista');
 Route::resource('grupos_vendedores', 'GruposVendedoresController',['only'=>['index','show','store','update','destroy']]);
+
+//rutas
+Route::get('rutas/get_cobradores', 'RutasController@get_cobradores');
+Route::resource('rutas', 'RutasController',['only'=>['index','show','store','update','destroy']]);
 

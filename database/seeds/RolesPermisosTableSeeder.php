@@ -119,9 +119,8 @@ class RolesPermisosTableSeeder extends Seeder
                 'permisos_id'=>4,
                 'roles_id'=>1,
             ],
-            //polizas
-            //vender
-            [
+             //Rutas
+             [
                 'modulos_id'=>6,
                 'permisos_id'=>1,
                 'roles_id'=>1,
@@ -138,6 +137,28 @@ class RolesPermisosTableSeeder extends Seeder
             ],
             [
                 'modulos_id'=>6,
+                'permisos_id'=>4,
+                'roles_id'=>1,
+            ],
+            //polizas
+            //vender
+            [
+                'modulos_id'=>7,
+                'permisos_id'=>1,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>7,
+                'permisos_id'=>2,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>7,
+                'permisos_id'=>3,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>7,
                 'permisos_id'=>4,
                 'roles_id'=>1,
             ],
