@@ -13,6 +13,9 @@ $factory->define(App\User::class, function (Faker $faker) {
     $roles = [1, 2, 3, 4, 5];
     $estados = [1, 0];
 
+    //id 1- sin actividad de ventas
+    $grupos_vendedores = [1, 2, 3, 4];
+
     $path =  public_path('images/profile.png');
     $type = pathinfo($path, PATHINFO_EXTENSION);
     $data = file_get_contents($path);
@@ -27,5 +30,6 @@ $factory->define(App\User::class, function (Faker $faker) {
         'created_at' => now(),
         'status' => Arr::random($estados),
         'roles_id' => Arr::random($roles),
+        'grupos_vendedores_id' => Arr::random($grupos_vendedores),
     ];
 });

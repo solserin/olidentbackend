@@ -85,7 +85,8 @@ class User extends Authenticatable
                     'imagen'=> $base64,
                     'roles_id' =>$request->rol_id,
                     'created_at' =>Carbon::now()->format('Y-m-d H:i:s'),
-                    'status'=>$request->estado
+                    'status'=>$request->estado,
+                    'grupos_vendedores_id'=>$request->grupos_vendedores_id,
                 ]
             );
             return $user_id;
@@ -105,6 +106,7 @@ class User extends Authenticatable
                     'roles_id' =>$request->rol_id,
                     'status'=>$request->estado,
                     'updated_at' =>Carbon::now()->format('Y-m-d H:i:s'),
+                    'grupos_vendedores_id'=>$request->grupos_vendedores_id,
                 ]
             );
             return $id;

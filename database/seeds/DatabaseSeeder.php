@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
            TipoPagosTableSeeder::class,
            TipoServiciosTableSeeder::class,
            ServiciosTableSeeder::class,
+           TiposPagoListaTableSeeder::class,
+           TiposPolizasTableSeeder::class,
+           TiposVentaTableSeeder::class,
+           GruposVendedoresTableSeeder::class,
        ]);
     }
 }

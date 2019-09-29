@@ -17,8 +17,8 @@ class TipoServiciosTableSeeder extends Seeder
                'estetica y restauracion dental',
                'cirugia dental',
                'endodoncia',
-               'ortodoncia','
-               prostodoncia fija',
+               'ortodoncia',
+               'prostodoncia fija',
                'prostodoncia total',
                'prostodoncia removible',
                'odontopediatria'

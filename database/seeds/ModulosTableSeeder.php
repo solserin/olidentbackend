@@ -42,6 +42,22 @@ class ModulosTableSeeder extends Seeder
                 'icon'=>'icon-basket-loaded',
                 'grupos_id'=>3
             ],
+            [
+                'modulo'=>'Vendedores',
+                'name'=>'Vendedores',
+                'url'=>'/catalogos/vendedores',
+                'icon'=>'icon-people',
+                'grupos_id'=>3
+            ],
+            // modulos de polizas
+             //servicios
+             [
+                'modulo'=>'Control de pólizas',
+                'name'=>'Polizas',
+                'url'=>'/polizas',
+                'icon'=>'icon-note',
+                'grupos_id'=>4
+            ],
         ];
         foreach($data as $dato){
           DB::table('modulos')->insert([

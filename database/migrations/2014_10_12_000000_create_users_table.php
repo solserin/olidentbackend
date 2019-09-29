@@ -24,7 +24,8 @@ class CreateUsersTable extends Migration
             $table->timestamps();
             $table->string('telefono')->nullable();
             $table->dateTime('fecha_baja')->nullable();
-            $table->integer('roles_id')->unsigned();
+            $table->integer('roles_id')->unsigned()->comment('relacion con el tipo de rol que tiene');
+            $table->integer('grupos_vendedores_id')->unsigned()->comment('relacion que define si tiene actividad de vendedor');
             $table->integer('status')->default(1);
         });
     }

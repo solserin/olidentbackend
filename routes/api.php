@@ -62,3 +62,9 @@ Route::resource('tipos_servicios', 'TipoServiciosController',['only'=>['index','
 //rutas de tipos de precio
 Route::resource('tipo_precios', 'TipoPreciosController',['only'=>['index']]);
 
+
+//grupos de vendedores
+
+Route::get('grupos_vendedores/get_agregar_modificar_lista', 'GruposVendedoresController@get_agregar_modificar_lista');
+Route::resource('grupos_vendedores', 'GruposVendedoresController',['only'=>['index','show','store','update','destroy']]);
+

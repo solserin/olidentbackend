@@ -83,7 +83,7 @@ class UserController extends ApiController
      */
     public function show($id)
     {
-        return $this->showOne(User::select('id','name','password','email','telefono','roles_id','status')->where('id', $id)->first());
+        return $this->showOne(User::select('id','name','password','email','telefono','roles_id','status','grupos_vendedores_id')->where('id', $id)->first());
     }
 
 
@@ -104,6 +104,7 @@ class UserController extends ApiController
                 'usuario' => ['email','required',Rule::unique('users','email')->ignore($id)],
                 'rol_id' => 'required',
                 'estado' => 'required',
+                'grupos_vendedores_id'=>'required'
             ],
             [
                 'required' => 'Este dato es obligatorio.',
@@ -159,6 +160,7 @@ class UserController extends ApiController
                  'password'=>'sometimes|same:password_repetir',
                  'password_repetir'=>'sometimes|same:password',
                  'verificar_usuario' => 'required',
+                 'grupos_vendedores_id'=>'required'
              ],
              [
                 'image64'=>'El logotipo debe ser una imagen (png, jpg, jpeg).',
