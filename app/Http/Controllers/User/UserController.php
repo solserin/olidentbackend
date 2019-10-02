@@ -31,7 +31,11 @@ class UserController extends ApiController
         //return $key;
         return $this->showAllPaginated(User::with('rol')->select(['imagen','created_at','id','name','email','roles_id','status'])->where('name', 'like', '%'.$key.'%')->orderBy('id','desc')->get());
     }
-
+    //obtiene la lista de vendedores autorizados
+    public function vendedores()
+    {
+        return $this->showAll(User::select(['id','name'])->where('grupos_vendedores_id', '>', '1')->orderBy('id','asc')->get());
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -59,6 +63,7 @@ class UserController extends ApiController
           'estado' => 'required',
           'password' => 'required',
           'password_repetir' => 'required|same:password',
+          'grupos_vendedores_id'=>'required'
         ],
         [
           'required' => 'Este dato es obligatorio.',
@@ -160,7 +165,6 @@ class UserController extends ApiController
                  'password'=>'sometimes|same:password_repetir',
                  'password_repetir'=>'sometimes|same:password',
                  'verificar_usuario' => 'required',
-                 'grupos_vendedores_id'=>'required'
              ],
              [
                 'image64'=>'El logotipo debe ser una imagen (png, jpg, jpeg).',

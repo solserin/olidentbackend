@@ -47,7 +47,6 @@ class Rutas extends Model
             return 0;
         }
     }
-
     
      //aqui elimino la ruta
      public function delete_ruta($id){

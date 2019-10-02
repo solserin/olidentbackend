@@ -16,7 +16,7 @@ class TiposPolizasTableSeeder extends Seeder
                 'tipo'=>'Individual',
                 'descripcion'=>'Para una sola persona',
                 'precio'=>398,
-                'numero_beneficiarios'=>1,
+                'numero_beneficiarios'=>0,
                 'minimo_abono'=>70,
                 'semanas_abono'=>9
             ],

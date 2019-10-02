@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
            TiposVentaTableSeeder::class,
            GruposVendedoresTableSeeder::class,
            RutasTableSeeder::class,
+           TiposBeneficiariosTableSeeder::class,
        ]);
     }
 }

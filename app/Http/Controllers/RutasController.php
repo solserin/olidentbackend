@@ -8,9 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Api\ApiController;
+use App\Localidades;
 
 class RutasController extends ApiController
 {
+
+    
     /**
      * Display a listing of the resource.
      *
@@ -22,6 +25,20 @@ class RutasController extends ApiController
         //return $key;
         return $this->showAllPaginated(Rutas::with('cobrador')->where('ruta', 'like', '%'.$key.'%')->where('status', '=','1')->orderBy('id','desc')->get());
     }
+    //trae todas las rutas existentes
+    public function get_rutas_disponibles()
+    {
+        return $this->showAll(Rutas::with('cobrador')->where('status', '=','1')->orderBy('id','asc')->get());
+    }
+
+    public function localidad()
+    {
+        $key = Input::get('filter');
+        //return $key;
+        return $this->showAll(Localidades::select('id','nombre','municipio_id')->with('municipio')->where('nombre', 'like', '%'.$key.'%')
+        ->whereIn('municipio_id',[1889,1891])->get());
+    }
+
     //regresa los usuarios que 
     public function get_cobradores()
     {

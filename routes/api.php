@@ -25,6 +25,9 @@ Route::post('usuarios/loadPerfil/{id}', 'User\UserController@loadPerfil');
 //obitiene los datos del usuario por email
 Route::get('usuarios/user_email/{email}', 'User\UserController@getUserByEmail');
 Route::put('usuarios/update_perfil/{user}', 'User\UserController@update_perfil');
+
+//regresa los vendedores
+Route::get('usuarios/vendedores', 'User\UserController@vendedores');
 Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store','update','destroy']]);
 
 
@@ -69,5 +72,14 @@ Route::resource('grupos_vendedores', 'GruposVendedoresController',['only'=>['ind
 
 //rutas
 Route::get('rutas/get_cobradores', 'RutasController@get_cobradores');
+Route::get('rutas/get_rutas_disponibles', 'RutasController@get_rutas_disponibles');
+//filtrar localidades
+Route::get('rutas/localidad', 'RutasController@localidad');
 Route::resource('rutas', 'RutasController',['only'=>['index','show','store','update','destroy']]);
+
+//tipos de poliza
+Route::resource('tipos_polizas', 'TiposPolizasController',['only'=>['index','show','store','update','destroy']]);
+
+//polizas
+Route::resource('polizas', 'PolizasController',['only'=>['index','show','store','update','destroy']]);
 

@@ -21,6 +21,7 @@ class CreateTipoPolizasTable extends Migration
             $table->string('numero_beneficiarios')->comment('cantidad de personas que pueden acceder a la poliza');
             $table->double('minimo_abono')->comment('minima cantidad por abono');
             $table->integer('semanas_abono')->unsigned()->comment('numero de semanas a pagar la poliza');
+            $table->smallInteger('duracion')->default('1');
             $table->integer('status')->default('1')->comment('');
         });
     }
