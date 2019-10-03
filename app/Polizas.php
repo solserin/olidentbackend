@@ -62,7 +62,7 @@ class Polizas extends Model
             }
 
             //registro venta
-            DB::table('ventas')->insert(
+            $id_venta=DB::table('ventas')->insertGetId(
                 [
                     'fecha_registro' =>Carbon::now()->format('Y-m-d H:i:s'),
                     'fecha_venta' =>$request->fecha_afiliacion,
@@ -74,13 +74,26 @@ class Polizas extends Model
                     'num_beneficiarios' =>$request->tipo_poliza_id['numero_beneficiarios'],
                     'total' =>$request->tipo_poliza_id['precio'],
                     'abonado' =>$request->abono,
-                    'restante' =>($request->tipo_poliza_id['precio']-$request->abonado),
+                    'restante' =>($request->tipo_poliza_id['precio']-$request->abono),
                     'comision_vendedor' =>($request->tipo_poliza_id['precio']*.10),//10 % de comision
                 ]
             );
 
-
-
+            //registro abono en la tabla abonos
+            if($request->abono>0){
+                //si se ingreso un valor mayor a cero en el abono inicial se debe de registrar
+                DB::table('abonos')->insert(
+                    [
+                        'fecha_registro' =>Carbon::now()->format('Y-m-d H:i:s'),
+                        'fecha_abono' =>$request->fecha_afiliacion,
+                        'formas_pago_id' =>1,//efectivo por default
+                        'cantidad' =>$request->abono,
+                        'cobrador_id' =>$request->vendedor_id['id'],//id del vendedor que cobro el abono inicial
+                        'usuario_capturo_id' =>$request->usuario_registro_id,
+                        'ventas_id' =>$id_venta,
+                    ]
+                );
+            }
             DB::commit();
             return $request->num_poliza;
         } catch (\Throwable $th) {

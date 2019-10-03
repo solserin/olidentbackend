@@ -26,7 +26,6 @@ class CreateAbonosTable extends Migration
             $table->integer('ventas_id')->unsigned()->comment('relacion con la venta');
         });
     }
-
     /**
      * Reverse the migrations.
      *

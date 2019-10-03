@@ -41,6 +41,9 @@
         "classmap": [
             "database/seeds",
             "database/factories"
+        ],
+        "files":[
+            "app/helpers/numeros_a_letras.php"
         ]
     },
     "autoload-dev": {

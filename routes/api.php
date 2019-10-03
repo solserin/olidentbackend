@@ -81,5 +81,6 @@ Route::resource('rutas', 'RutasController',['only'=>['index','show','store','upd
 Route::resource('tipos_polizas', 'TiposPolizasController',['only'=>['index','show','store','update','destroy']]);
 
 //polizas
+Route::get('polizas/nota_venta', 'PolizasController@nota_venta');
 Route::resource('polizas', 'PolizasController',['only'=>['index','show','store','update','destroy']]);
 
