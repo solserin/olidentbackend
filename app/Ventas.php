@@ -28,4 +28,15 @@ class Ventas extends Model
         return $this->hasOne('App\TiposPolizas','id','tipo_polizas_id');
     }
 
+    public function abonos(){
+        return $this->hasMany('App\Abonos','ventas_id','id');
+    }
+
+    public function ventas(){
+        return $this->hasMany('App\Ventas','polizas_id','num_poliza');
+    }
+
+
+
+
 }

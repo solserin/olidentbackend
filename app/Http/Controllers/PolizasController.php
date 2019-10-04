@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Api\ApiController;
-use App\Localidades;
-use App\Polizas;
 use App\Ventas;
-use Barryvdh\DomPDF\Facade as PDF;
+use App\Polizas;
+use App\Localidades;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Api\ApiController;
 
 class PolizasController extends ApiController
 {
@@ -26,7 +27,27 @@ class PolizasController extends ApiController
      */
     public function index()
     {
-        //
+      return $this->showAllPaginated(Polizas::
+        with(
+          array('ventas'=>function($query){
+              $query->select('id','polizas_id','vendedor_id',DB::raw('"'.DB::table('users')->select('name')->where('id','=','1')->first()->name.'" as vendedor'))->orderBy('id','desc');
+
+          })
+        )
+        ->with('ruta')
+        ->withCount(
+          array('ventas as estado_servicio'=>function($query){
+            $query->where('fecha_vencimiento','>',Carbon::now()->format('Y-m-d H:i:s'));
+          })
+        )
+        ->withCount('ventas as total_ventas')
+        ->with(
+          array('beneficiarios'=>function($query){
+            $query->select('id','nombre','polizas_id')->orderBy('id','asc');
+          })
+        )
+        ->orderBy('num_poliza','asc')
+        ->get());
     }
 
     /**
@@ -80,6 +101,7 @@ class PolizasController extends ApiController
     
       //aqui guardo la poliza
       $obj = new Polizas();
+      // el resultad regresa el numero de venta
       $resultado=$obj->guardar_poliza($request);
       return $resultado;
     }
@@ -137,7 +159,9 @@ class PolizasController extends ApiController
     public function nota_venta(){
        $id_venta = Input::get('venta_id');
        $num_poliza = Input::get('poliza_id');
-       
+       if(!Input::get('venta_id') || !Input::get('poliza_id')){
+         return $this->errorResponse('Error, esta URL no existe',404);
+       }
       //eliminos los archivos anteriores
         $files=Storage::disk('images_base64')->files();
         foreach($files as $fi)
@@ -154,13 +178,20 @@ class PolizasController extends ApiController
         ->with('beneficiarios:id,nombre,polizas_id,tipo_beneficiarios_id,calle,colonia,numero,cp,localidad_id,ocupacion,edad,telefono')
         ->where('polizas_id',$num_poliza)
         ->where('id',$id_venta)
-        ->get()
-        ->toArray();
-
-
-        $localidad=Localidades::with('municipio')->where('id',$venta[0]['beneficiarios'][0]['localidad_id'])
-        ->get()
-        ->toArray();
+        ->get();
+        if(!count($venta)){
+          return $this->errorResponse('Error, esta URL no existe',404);
+        }
+        //return $venta;
+        //si hay resultados de la venta cargo la localidad de la venta
+        if(isset($venta[0]['beneficiarios'][0]['localidad_id'])){
+          $localidad=Localidades::with('municipio')->where('id',$venta[0]['beneficiarios'][0]['localidad_id'])
+          ->get()
+          ->toArray();
+        }else{
+          $localidad='';
+        }
+        
         //return $venta;
        //return $venta[0]['poliza']['id'];
         // Obtener los datos de la imagen
@@ -178,4 +209,64 @@ class PolizasController extends ApiController
         $pdf = PDF::loadView('polizas/nota_venta',compact('empresa','file','venta','localidad'))->setPaper('a4');
         return $pdf->stream('archivo.pdf');
       }
+
+
+
+
+
+      public function tarjeta_cobranza(){
+        $id_venta = Input::get('venta_id');
+        if(!Input::get('venta_id')){
+          return $this->errorResponse('Error, esta URL no existe',404);
+        }
+       //eliminos los archivos anteriores
+         $files=Storage::disk('images_base64')->files();
+         foreach($files as $fi)
+         {
+           Storage::disk('images_base64')->delete($fi);
+         }
+ 
+         $empresa=DB::table('empresas')->where('id',1)->get()->toArray();
+
+
+         //obtengo los datos de la venta
+         $venta=Ventas::with('poliza')
+         ->with('vendedor:id,name')
+         ->with('tipo_venta')
+         ->with('abonos')
+         ->with('tipo_poliza')
+         ->with('beneficiarios:id,nombre,polizas_id,tipo_beneficiarios_id,calle,colonia,numero,cp,localidad_id,ocupacion,edad,telefono')
+         ->where('id',$id_venta)
+         ->get();
+         return $venta;
+         if(!count($venta)){
+           return $this->errorResponse('Error, esta URL no existe',404);
+         }
+         //return $venta;
+         //si hay resultados de la venta cargo la localidad de la venta
+         if(isset($venta[0]['beneficiarios'][0]['localidad_id'])){
+           $localidad=Localidades::with('municipio')->where('id',$venta[0]['beneficiarios'][0]['localidad_id'])
+           ->get()
+           ->toArray();
+         }else{
+           $localidad='';
+         }
+         
+         //return $venta;
+        //return $venta[0]['poliza']['id'];
+         // Obtener los datos de la imagen
+         $img =getB64Image($empresa[0]->logo);
+         // Obtener la extensión de la Imagen
+         $img_extension =getB64Extension($empresa[0]->logo);
+         // Crear un nombre aleatorio para la imagen
+         $img_name = 'logo'. time() . '.' . $img_extension;   
+         // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
+         // la función "put" el nombre de la imagen y los datos de la imagen como 
+         // segundo parametro
+         Storage::disk('images_base64')->put($img_name, $img);
+         $file = storage_path('app/images_base64/'.$img_name);
+       
+         $pdf = PDF::loadView('polizas/nota_venta',compact('empresa','file','venta','localidad'))->setPaper('a4');
+         return $pdf->stream('archivo.pdf');
+       }
 }

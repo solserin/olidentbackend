@@ -15,7 +15,7 @@ class CreatePolizasTable extends Migration
     {
         Schema::create('polizas', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('');
-            $table->string('num_poliza')->comment('numero unico de la poliza');
+            $table->integer('num_poliza')->comment('numero unico de la poliza');
             $table->date('fecha_afiliacion')->nullable()->comment('fecha en que se afilio la persona a la clinica');
             $table->integer('usuario_capturo_id')->unsigned()->comment('id del usuario que guardo la poliza');
             $table->integer('rutas_id')->unsigned()->comment('id de la ruta a la que se asignara cobro');

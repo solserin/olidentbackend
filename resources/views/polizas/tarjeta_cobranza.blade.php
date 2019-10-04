@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Nota de Venta</title>
+<title>Tarjeta de cobranza</title>
 
 <style type="text/css">
 body{
@@ -90,14 +90,10 @@ footer {
                     <h4>{{$empresa[0]->nombre}}</h4>
                     <h5>Seguridad a tu sonrisa</h5>
                 </td> 
-                <td width="20%" id="folio" style="font-size:12px !important;">
-                    <span class="datos">Num. Póliza: 
+                <td width="20%" id="folio">
+                    <span class="datos">Folio: 
                         <span class="dato-des">
                         {{$venta[0]['polizas_id']}}
-                    </span></span><br>
-                    <span class="datos">Venta: 
-                            <span class="dato-des">
-                            {{$venta[0]['id']}}
                     </span></span>
                 </td>
                   

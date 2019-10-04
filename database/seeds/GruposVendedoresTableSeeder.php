@@ -18,19 +18,15 @@ class GruposVendedoresTableSeeder extends Seeder
             ],
             [
                 'grupo'=>'Grupo 1',
-                'descripcion'=>'Grupo 1 des',
+                'descripcion'=>'Grupo 1 de vendedores',
             ],
             [
-                'grupo'=>'Grupo 2',
-                'descripcion'=>'Grupo 2 des',
+                'grupo'=>'Venta de mostrador',
+                'descripcion'=>'Usuarios que pueden vender en recepción',
             ],
             [
-                'grupo'=>'Grupo 3',
-                'descripcion'=>'Grupo 3 des',
-            ],
-            [
-                'grupo'=>'Grupo 4',
-                'descripcion'=>'Grupo 4 des',
+                'grupo'=>'Venta en cobranza',
+                'descripcion'=>'Usuarios que pueden vender durante cobranza',
             ]
         ];
         foreach($data as $dato){

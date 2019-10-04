@@ -11,6 +11,20 @@ class Polizas extends Model
 {
     protected $table = 'polizas';
 
+
+    public function ventas(){
+        return $this->hasMany('App\Ventas','polizas_id','num_poliza');
+    }
+    public function beneficiarios(){
+        return $this->hasMany('App\Beneficiarios','polizas_id','num_poliza');
+    }
+
+    public function ruta(){
+        return $this->hasOne('App\Rutas','id','rutas_id');
+    }
+
+
+
     //aqui guardo los datos de la poliza
     public function guardar_poliza(Request $request){
         try {
@@ -95,7 +109,7 @@ class Polizas extends Model
                 );
             }
             DB::commit();
-            return $request->num_poliza;
+            return $id_venta;
         } catch (\Throwable $th) {
             DB::rollBack();
             return 0;

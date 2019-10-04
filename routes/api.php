@@ -82,5 +82,6 @@ Route::resource('tipos_polizas', 'TiposPolizasController',['only'=>['index','sho
 
 //polizas
 Route::get('polizas/nota_venta', 'PolizasController@nota_venta');
+Route::get('polizas/tarjeta_cobranza', 'PolizasController@tarjeta_cobranza');
 Route::resource('polizas', 'PolizasController',['only'=>['index','show','store','update','destroy']]);
 
