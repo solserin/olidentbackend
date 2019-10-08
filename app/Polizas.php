@@ -25,6 +25,7 @@ class Polizas extends Model
 
 
 
+
     //aqui guardo los datos de la poliza
     public function guardar_poliza(Request $request){
         try {

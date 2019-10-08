@@ -24,6 +24,7 @@ class CreateAbonosTable extends Migration
             $table->string('latitud_cobro')->nullable()->comment('latitud de donde se cobro la poliza');
             $table->string('longitud_cobro')->nullable()->comment('longitud de donde se cobro la poliza');
             $table->integer('ventas_id')->unsigned()->comment('relacion con la venta');
+            $table->integer('status')->default(1)->comment('status del pago');
         });
     }
     /**

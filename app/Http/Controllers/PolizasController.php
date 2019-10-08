@@ -30,23 +30,35 @@ class PolizasController extends ApiController
       return $this->showAllPaginated(Polizas::
         with(
           array('ventas'=>function($query){
-              $query->select('id','polizas_id','vendedor_id',DB::raw('"'.DB::table('users')->select('name')->where('id','=','1')->first()->name.'" as vendedor'))->orderBy('id','desc');
-
+              $query->select(
+                'tipos_venta.tipo as tipoVenta','fecha_venta',
+                'tipo_polizas.tipo','tipo_polizas_id','ventas.id',
+                'polizas_id','vendedor_id','abonado','total',
+                'restante','name','fecha_vencimiento'
+                )
+              ->join('users', 'users.id', '=', 'ventas.vendedor_id')
+              ->join('tipos_venta', 'tipos_venta.id', '=', 'ventas.tipos_venta_id')
+              ->join('tipo_polizas', 'tipo_polizas.id', '=', 'ventas.tipo_polizas_id')
+              ->orderBy('id','desc');
           })
         )
         ->with('ruta')
         ->withCount(
           array('ventas as estado_servicio'=>function($query){
-            $query->where('fecha_vencimiento','>',Carbon::now()->format('Y-m-d H:i:s'));
+            $query->where('fecha_vencimiento','>',Carbon::now()->format('Y-m-d H:i:s'))
+            ->where('status','=',1);
           })
         )
         ->withCount('ventas as total_ventas')
         ->with(
           array('beneficiarios'=>function($query){
-            $query->select('id','nombre','polizas_id')->orderBy('id','asc');
+            $query
+            ->select('beneficiarios.id','nombre','polizas_id','edad','tipo_beneficiarios_id','tipo')
+            ->join('tipo_beneficiarios', 'tipo_beneficiarios.id', '=', 'beneficiarios.tipo_beneficiarios_id')
+            ->orderBy('id','asc');
           })
         )
-        ->orderBy('num_poliza','asc')
+        ->orderBy('num_poliza','desc')
         ->get());
     }
 

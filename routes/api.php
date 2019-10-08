@@ -85,3 +85,7 @@ Route::get('polizas/nota_venta', 'PolizasController@nota_venta');
 Route::get('polizas/tarjeta_cobranza', 'PolizasController@tarjeta_cobranza');
 Route::resource('polizas', 'PolizasController',['only'=>['index','show','store','update','destroy']]);
 
+//ventas
+Route::get('ventas/estado_cuenta/{id_venta}', 'VentasController@estado_cuenta');
+Route::put('ventas/cancelar_pago/{pago_id}', 'VentasController@cancelar_pago');
+Route::resource('ventas', 'VentasController',['only'=>['index','show','store','update','destroy']]);

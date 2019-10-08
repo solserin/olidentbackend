@@ -28,7 +28,8 @@ class RutasController extends ApiController
     //trae todas las rutas existentes
     public function get_rutas_disponibles()
     {
-        return $this->showAll(Rutas::with('cobrador')->where('status', '=','1')->orderBy('id','asc')->get());
+        //original return $this->showAll(Rutas::with('cobrador')->where('status', '=','1')->orderBy('id','asc')->get());
+        return $this->showAll(Rutas::where('status', '=','1')->orderBy('id','asc')->get());
     }
 
     public function localidad()
