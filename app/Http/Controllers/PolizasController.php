@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Beneficiarios;
 use App\Ventas;
 use App\Polizas;
 use App\Localidades;
@@ -34,7 +35,10 @@ class PolizasController extends ApiController
                 'tipos_venta.tipo as tipoVenta','fecha_venta',
                 'tipo_polizas.tipo','tipo_polizas_id','ventas.id',
                 'polizas_id','vendedor_id','abonado','total',
-                'restante','name','fecha_vencimiento'
+                'restante','name','fecha_vencimiento','ventas.status',
+                \DB::raw(
+                  'IF(ventas.fecha_vencimiento > '.'"'.Carbon::now()->format('Y-m-d H:i:s').'"'.', "1","0") as estado_venta'
+                )
                 )
               ->join('users', 'users.id', '=', 'ventas.vendedor_id')
               ->join('tipos_venta', 'tipos_venta.id', '=', 'ventas.tipos_venta_id')
@@ -60,6 +64,14 @@ class PolizasController extends ApiController
         )
         ->orderBy('num_poliza','desc')
         ->get());
+    }
+
+    public function beneficiario()
+    {
+        $key = Input::get('filter');
+        //return $key;
+        return $this->showAll(Beneficiarios::select('id','nombre','polizas_id','colonia','calle','numero')->where('nombre', 'like', '%'.$key.'%')
+        ->where('tipo_beneficiarios_id',1)->get());
     }
 
     /**
@@ -89,7 +101,7 @@ class PolizasController extends ApiController
           'tipo_poliza_id'=>'required',
           'ruta_id'=>'required',
           'vendedor_id'=>'required',
-          'abono'=>'required|numeric|max:'.$request->tipo_poliza_id['precio'],
+          'abono'=>'required|numeric|max:'.$request->tipo_poliza_id['precio'].'|min:0',
           'titular'=>'required',
           'colonia'=>'required',
           'calle'=>'required',
@@ -102,6 +114,7 @@ class PolizasController extends ApiController
         ],
         [
           'max'=>'La cantidad de abono no debe superar el precio de la póliza ('.$request->tipo_poliza_id['precio'].' Pesos.)',
+          'min'=>'El abono debe ser mínimo 0 Pesos.',
           'required' => 'Este dato es obligatorio.',
           'date_format'=>'Seleccione una fecha válida.',
           'integer' => 'Este dato debe ser un numero entero.',
@@ -149,7 +162,80 @@ class PolizasController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        //
+         //validacion de datos para el nuevo usuario
+       request()->validate(
+        [
+          'usuario_registro_id' => 'required|integer',
+          'num_poliza' => 'required|integer',
+          'fecha_venta' => 'required|date_format:Y-m-d',
+          'tipo_poliza_id'=>'required',
+          'ruta_id'=>'required',
+          'vendedor_id'=>'required',
+          'titular'=>'required',
+          'colonia'=>'required',
+          'calle'=>'required',
+          'edad'=>'required',
+          'numero'=>'required',
+          'telefono'=>'required',
+          'localidad_id'=>'required',
+          'beneficiarios.*.nombre'=>Rule::requiredIf($request->tipo_poliza_id['id']>1),
+          'beneficiarios.*.edad'=>Rule::requiredIf($request->tipo_poliza_id['id']>1),
+        ],
+        [
+          'required' => 'Este dato es obligatorio.',
+          'date_format'=>'Seleccione una fecha válida.',
+          'integer' => 'Este dato debe ser un numero entero.',
+          'numeric' => 'Este dato debe ser un numero.',
+          'email' => 'Debe ingresar un email',
+        ]
+      );
+    
+      //aqui guardo la poliza
+      $obj = new Polizas();
+      // el resultad regresa el numero de venta
+      $resultado=$obj->modificar_poliza($request,$id);
+      return $resultado;
+    }
+
+
+    public function renovar_poliza(Request $request)
+    {
+      request()->validate(
+        [
+          'usuario_registro_id' => 'required|integer',
+          'num_poliza' => 'required|integer',
+          'fecha_venta' => 'required|date_format:Y-m-d',
+          'tipo_poliza_id'=>'required',
+          'ruta_id'=>'required',
+          'vendedor_id'=>'required',
+          'abono'=>'required|numeric|max:'.$request->tipo_poliza_id['precio'].'|min:0',
+          'titular'=>'required',
+          'colonia'=>'required',
+          'calle'=>'required',
+          'edad'=>'required',
+          'numero'=>'required',
+          'telefono'=>'required',
+          'localidad_id'=>'required',
+          'beneficiarios.*.nombre'=>Rule::requiredIf($request->tipo_poliza_id['id']>1),
+          'beneficiarios.*.edad'=>Rule::requiredIf($request->tipo_poliza_id['id']>1),
+        ],
+        [
+          'max'=>'La cantidad de abono no debe superar el precio de la póliza ('.$request->tipo_poliza_id['precio'].' Pesos.)',
+          'min'=>'El abono debe ser mínimo 0 Pesos.',
+          'required' => 'Este dato es obligatorio.',
+          'date_format'=>'Seleccione una fecha válida.',
+          'integer' => 'Este dato debe ser un numero entero.',
+          'numeric' => 'Este dato debe ser un numero.',
+          'email' => 'Debe ingresar un email',
+          //'unique' => 'Esta póliza ya existe, tal vez deba ir al formulario de renovación.',
+        ]
+      );
+    
+      //aqui guardo la poliza
+      $obj = new Polizas();
+      // el resultad regresa el numero de venta
+      $resultado=$obj->renovar_poliza($request);
+      return $resultado;
     }
 
     /**

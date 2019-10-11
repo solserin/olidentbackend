@@ -162,6 +162,28 @@ class RolesPermisosTableSeeder extends Seeder
                 'permisos_id'=>4,
                 'roles_id'=>1,
             ],
+            //cobranza
+             //vender
+             [
+                'modulos_id'=>8,
+                'permisos_id'=>1,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>8,
+                'permisos_id'=>2,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>8,
+                'permisos_id'=>3,
+                'roles_id'=>1,
+            ],
+            [
+                'modulos_id'=>8,
+                'permisos_id'=>4,
+                'roles_id'=>1,
+            ],
            
         ];
         foreach($data as $dato){

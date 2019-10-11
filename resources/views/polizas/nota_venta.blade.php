@@ -100,7 +100,6 @@ footer {
                             {{$venta[0]['id']}}
                     </span></span>
                 </td>
-                  
             </tr>
             <tr>
                 <td colspan="3">
@@ -115,8 +114,12 @@ footer {
                 </td>
             </tr>
         </table>
-        
         <table width="100%" id="datosTitular">
+            <tr>
+                <td colspan="4">
+                        <span class="datos">Vendido por: <span class="dato-des">{{$venta[0]['vendedor']['name']}}</span></span>
+                </td>      
+            </tr> 
             <tr>
                 <td align="center">
                     <span class="datos">Tipo Venta: <br> <span class="dato-des">{{$venta[0]['tipo_venta']['tipo']}}</span></span>
@@ -151,7 +154,6 @@ footer {
                 <td align="center">
                     <span class="datos">Edad: <span class="dato-des">{{ucfirst($venta[0]['beneficiarios'][0]['edad'])}}</span></span>
                 </td> 
-      
             </tr> 
             <tr>
                     <td colspan="1">
@@ -169,11 +171,8 @@ footer {
             </tr>  
         </table>
         <br>
-        @if (count($venta[0]['beneficiarios'])>1)
+        @if ($venta[0]['tipo_poliza']['id']>1)
         <h2>BENEFICIARIOS</h2> 
-        @else
-        <h2>BENEFICIARIOS N/A</h2>
-        @endif
         <br>
         <br>
         <table width="100%" id="datosTitular">
@@ -200,6 +199,10 @@ footer {
                 @endif
             @endforeach  
         </table>
+        @else
+        <h2>BENEFICIARIOS N/A</h2>
+        @endif
+        
     @else
     <table width="100%" style="text-align:center;">
             <tr>

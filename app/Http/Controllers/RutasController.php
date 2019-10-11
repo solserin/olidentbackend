@@ -31,7 +31,7 @@ class RutasController extends ApiController
         //original return $this->showAll(Rutas::with('cobrador')->where('status', '=','1')->orderBy('id','asc')->get());
         return $this->showAll(Rutas::where('status', '=','1')->orderBy('id','asc')->get());
     }
-
+    
     public function localidad()
     {
         $key = Input::get('filter');

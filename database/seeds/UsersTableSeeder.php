@@ -28,7 +28,110 @@ class UsersTableSeeder extends Seeder
             ]);
         }*/
 
+        $path =  public_path('images/profile.png');
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+        DB::table('users')->insert([
+            'name'=>'Kimberly Soler',
+            'email'=>'kimberly@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>1,
+            'grupos_vendedores_id'=>3,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'GERARDO PONCE',
+            'email'=>'gerardo@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>4,
+            'grupos_vendedores_id'=>2,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'CRISTOBAL BANUELOS',
+            'email'=>'cristobal@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>4,
+            'grupos_vendedores_id'=>2,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'KAREN N',
+            'email'=>'karen@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>4,
+            'grupos_vendedores_id'=>2,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'DIANA DIAZ',
+            'email'=>'diana@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>2,
+            'grupos_vendedores_id'=>2,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'NORMA N',
+            'email'=>'norma@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>2,
+            'grupos_vendedores_id'=>3,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'JOSUE BELTRAN',
+            'email'=>'josue@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>3,
+            'grupos_vendedores_id'=>4,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'BRIAN N',
+            'email'=>'brian@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>3,
+            'grupos_vendedores_id'=>4,
+            'imagen'=>$base64
+        ]);
+
+        DB::table('users')->insert([
+            'name'=>'MANUEL SOLER',
+            'email'=>'manuel@gmail.com',
+            'password'=> Hash::make('secret'),
+            'created_at'=>now(),
+            'telefono'=>'por definir',
+            'roles_id'=>3,
+            'grupos_vendedores_id'=>4,
+            'imagen'=>$base64
+        ]);
         //usando en seeds
-        factory('App\User', 10)->create();
+        //factory('App\User', 10)->create();
     }
 }

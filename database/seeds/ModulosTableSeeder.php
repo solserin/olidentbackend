@@ -59,9 +59,16 @@ class ModulosTableSeeder extends Seeder
             // modulos de polizas
              //servicios
              [
-                'modulo'=>'Control de pólizas',
-                'name'=>'Polizas',
-                'url'=>'/polizas',
+                'modulo'=>'Control de ventas',
+                'name'=>'Ventas',
+                'url'=>'/ventas',
+                'icon'=>'icon-note',
+                'grupos_id'=>4
+            ],
+            [
+                'modulo'=>'Control de cobranza',
+                'name'=>'Cobranza',
+                'url'=>'/cobranza',
                 'icon'=>'icon-note',
                 'grupos_id'=>4
             ],

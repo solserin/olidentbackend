@@ -17,8 +17,8 @@ class RolesTableSeeder extends Seeder
             'Administrador',
             'Recepcionista',
             'Cobrador',
-            'Dentista',
-            'Vendedor'
+            'Vendedor',
+            'Dentista'
         ];
         foreach($roles as $rol){
           DB::table('roles')->insert([

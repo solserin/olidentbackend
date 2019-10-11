@@ -12,7 +12,7 @@ class Ventas extends Model
     protected $table = 'ventas';
 
     public function poliza(){
-        return $this->hasOne('App\Polizas','id','polizas_id');
+        return $this->hasOne('App\Polizas','num_poliza','polizas_id');
     }
 
     public function vendedor(){

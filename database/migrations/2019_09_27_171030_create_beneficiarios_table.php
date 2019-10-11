@@ -15,6 +15,7 @@ class CreateBeneficiariosTable extends Migration
     {
         Schema::create('beneficiarios', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('');
+            $table->integer('num_beneficiario')->nullable()->comment('numerd de beneficiarios');
             $table->string('nombre')->comment('');
             $table->longText('fotografia')->nullable()->comment('');
             $table->string('colonia')->nullable()->comment('');

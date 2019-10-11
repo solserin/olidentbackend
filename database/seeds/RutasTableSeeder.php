@@ -13,19 +13,19 @@ class RutasTableSeeder extends Seeder
     {
         $data=[
             [
-                'ruta'=>'Ruta 1',
-                'descripcion'=>'Villa union y rancherias',
-                'cobrador_id'=>'2'
-            ],
-            [
-                'ruta'=>'Ruta 2',
+                'ruta'=>'Ruta 2 - Rosario',
                 'descripcion'=>'Rosario',
-                'cobrador_id'=>'4'
+                'cobrador_id'=>'7'
             ],
             [
-                'ruta'=>'Ruta 3',
-                'descripcion'=>'Recodo villa union',
-                'cobrador_id'=>'6'
+                'ruta'=>'Ruta 1 - Villa unión',
+                'descripcion'=>'Localidades de villaunion	',
+                'cobrador_id'=>'8'
+            ],
+            [
+                'ruta'=>'Ruta 3 - Villa union',
+                'descripcion'=>'Villa unión',
+                'cobrador_id'=>'9'
             ]
         ];
         foreach($data as $dato){
