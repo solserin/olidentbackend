@@ -235,6 +235,10 @@ class Polizas extends Model
 
 
 
+   
+
+
+
     //aqui renovo una poliza
     public function renovar_poliza(Request $request){
         try {
@@ -252,7 +256,7 @@ class Polizas extends Model
             }
 
             //valido que la poliza ya haya sido pagada antes de renovar, esto solo en caso de que no haya sido canceladas
-            if($venta->status==1){
+            if($venta->status==1 && $venta->restante>0){
                 //no procede porque no ha pagado la poliza anterior
                 return -2;
             }
@@ -350,4 +354,38 @@ class Polizas extends Model
             return 0;
         }
     }
+
+
+
+
+
+
+
+
+
+    //aqui cancelo una poliza
+    public function cancelar_poliza($id){
+        try {
+            DB::beginTransaction();
+            $venta=Ventas::where('id',$id)->first();
+            if($venta->status==1 && Carbon::createFromDate($venta->fecha_vencimiento)->format('Y-m-d') > Carbon::now()->format('Y-m-d')){
+                //procede porque no esta cancelada ni tampoco vencida
+                DB::table('ventas')->where('id',$id)->update(
+                    [
+                        'status' =>0
+                    ]
+                );
+            }else{
+                // ya ha sido cancelada o esta vencida la poliza
+                return -1;
+            }
+            DB::commit();
+            return $id;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return 0;
+        }
+    }
+
+
 }

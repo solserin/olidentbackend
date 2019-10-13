@@ -76,9 +76,39 @@ footer {
     text-align: center;
     font-size: 14px;
 }
+
+#watermark {
+    top:30%;
+    left: 25%;
+    position: fixed;
+    transform: rotate(-45deg);
+    color: #dc3545;
+    border: 3px dashed #dc3545;
+    font-size: 38px;
+    width: 330px;
+    height: 50px;
+    text-align: center;
+    z-index: -1000;
+}
+
+.pagado{
+    color:#28a745
+}
 </style>
 </head>
 <body>
+      @if ($venta[0]['status']==1)
+        @if($estado_poliza_venta==0)
+            <div id="watermark">
+                Póliza Vencida
+            </div>
+        @endif
+        @else
+            <div id="watermark">
+                Póliza Cancelada
+            </div>
+        @endif
+   
     <footer>
     Actualizado para el día {{fechahora_completa()}}.
     </footer>
@@ -166,7 +196,19 @@ footer {
                             <span class="datos">Abonado: $ <span class="dato-des">{{number_format($venta[0]['abonado'],2,".",",")}} Pesos.</span></span>
                     </td>
                     <td colspan="1">
-                        <span class="datos">Restante: $ <span class="dato-des">{{number_format($venta[0]['restante'],2,".",",")}} Pesos.</span></span>
+                        <span class="datos">
+                            Restante: 
+                            @if ($venta[0]['restante']>0)
+                                $ <span class="dato-des">
+                                {{number_format($venta[0]['restante'],2,".",",")}} Pesos.
+                            </span>
+                            @else
+                                <span class="pagado">
+                                    Pagada
+                                </span>
+                            @endif
+                            
+                        </span>
                     </td>        
             </tr>  
         </table>

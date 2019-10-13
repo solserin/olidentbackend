@@ -242,6 +242,12 @@ function subfijo($cifras)
    return strtoupper(date('d',strtotime($fecha))." de ".$arrayMeses[date('m',strtotime($fecha))-1]." de ".date('Y',strtotime($fecha)));
 }
 
+function fecha_abr($fecha){
+    $arrayMeses = array('Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+   'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
+   return date('d',strtotime($fecha))."/".$arrayMeses[date('m',strtotime($fecha))-1]."/".date('Y',strtotime($fecha));
+}
+
 
 
 
