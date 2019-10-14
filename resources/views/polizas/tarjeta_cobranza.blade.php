@@ -179,7 +179,7 @@ for ($x = 0; $x < 2; $x++) {
                                             Citas Villa Unión: 669 193 0497
                                         </td>
                                         <td width="50%">
-                                            Citas Villa Unión: 669 193 0497
+                                            Citas Villa Unión: 694 114 2047
                                         </td>
                                     </tr>
                                 </table>
@@ -217,6 +217,11 @@ for ($x = 0; $x < 2; $x++) {
                                                     <span class="dato">
                                                        Tipo de Venta:
                                                     </span><br><span class="dato-des">{{$venta[0]['tipo_venta']['tipo']}}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="dato">
+                                                       Precio:
+                                                    </span><br><span class="dato-des">{{number_format($venta[0]['total'],2,".",",")}}</span>
                                                 </td>
                                             </tr>
                                         </table>
@@ -336,7 +341,7 @@ for ($x = 0; $x < 2; $x++) {
                         @endforeach
                         @for ($i =  $pagos_hechos; $i <15; $i++)
                             <tr>
-                                <td>-</td>
+                                <td style="color:#fff;">-</td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
