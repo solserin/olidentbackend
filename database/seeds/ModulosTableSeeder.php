@@ -62,14 +62,14 @@ class ModulosTableSeeder extends Seeder
                 'modulo'=>'Control de ventas',
                 'name'=>'Ventas',
                 'url'=>'/ventas',
-                'icon'=>'icon-note',
+                'icon'=>'basket-loaded',
                 'grupos_id'=>4
             ],
             [
                 'modulo'=>'Control de cobranza',
                 'name'=>'Cobranza',
                 'url'=>'/cobranza',
-                'icon'=>'icon-note',
+                'icon'=>'dollar',
                 'grupos_id'=>4
             ],
         ];
