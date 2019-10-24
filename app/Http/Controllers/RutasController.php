@@ -41,7 +41,7 @@ class RutasController extends ApiController
         $key = Input::get('filter');
         //return $key;
         return $this->showAll(Localidades::select('id','nombre','municipio_id')->with('municipio')->where('nombre', 'like', '%'.$key.'%')
-        ->whereIn('municipio_id',[1889,1891])->get());
+        ->whereIn('municipio_id',[1889,1891,1881,1886])->get());
     }
 
     //regresa los usuarios que 
