@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Nota de Venta</title>
+<title>Tarjeta de cobro</title>
 
 <style type="text/css">
 img{
