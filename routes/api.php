@@ -86,6 +86,7 @@ Route::post('polizas/renovar_poliza', 'PolizasController@renovar_poliza');
 Route::put('polizas/cancelar_poliza/{id}', 'PolizasController@cancelar_poliza');
 Route::get('polizas/nota_venta', 'PolizasController@nota_venta');
 Route::get('polizas/tarjeta_cobranza', 'PolizasController@tarjeta_cobranza');
+
 Route::resource('polizas', 'PolizasController',['only'=>['index','show','store','update','destroy']]);
 
 //ventas

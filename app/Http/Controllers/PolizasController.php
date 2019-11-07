@@ -79,12 +79,13 @@ class PolizasController extends ApiController
           $query
             ->select('beneficiarios.id', 'nombre', 'polizas_id', 'edad', 'tipo_beneficiarios_id', 'tipo')
             ->join('tipo_beneficiarios', 'tipo_beneficiarios.id', '=', 'beneficiarios.tipo_beneficiarios_id')
-            ->where('tipo_beneficiarios_id', '1')
+            //->where('tipo_beneficiarios_id', '1')
             ->orderBy('id', 'asc');
         })
       )
       ->join('beneficiarios', 'polizas.num_poliza', '=', 'beneficiarios.polizas_id')
       ->where('beneficiarios.nombre', 'like', '%' . $titular . '%')
+      ->where('beneficiarios.tipo_beneficiarios_id', '1')
       ->when($num_poliza != '', function ($q) use ($num_poliza) {
         return $q->where('num_poliza', '=', $num_poliza);
       })
