@@ -92,4 +92,9 @@ Route::resource('polizas', 'PolizasController',['only'=>['index','show','store',
 //ventas
 Route::get('ventas/estado_cuenta/{id_venta}', 'VentasController@estado_cuenta');
 Route::put('ventas/cancelar_pago/{pago_id}', 'VentasController@cancelar_pago');
+
+//reporte de pagos
+Route::get('ventas/reporte_especifico_pagos', 'VentasController@reporte_especifico_pagos');
+
+
 Route::resource('ventas', 'VentasController',['only'=>['index','show','store','update','destroy']]);

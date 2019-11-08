@@ -149,7 +149,7 @@ class UserController extends ApiController
      //regresa de un usuario por email
      public function getUserByEmail($email='')
      {
-        return $this->showOne(User::where('status', 1)->where('email',$email)->first(['id','email','imagen','name','telefono','updated_at']));
+        return $this->showOne(User::where('status', 1)->where('email',$email)->first(['id','email','imagen','name','telefono','updated_at','roles_id']));
      }
 
 

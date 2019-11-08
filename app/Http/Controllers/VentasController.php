@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Abonos;
 use App\Ventas;
+use App\Localidades;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Api\ApiController;
 
 class VentasController extends ApiController
@@ -205,4 +210,36 @@ class VentasController extends ApiController
     $resultado = $obj->cancelar_pago($request, $venta);
     return $resultado;
   }
+
+  //REPORTES DE PAGOS
+  public function reporte_especifico_pagos(){
+    $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
+    //obtengo la lista de informacion
+    $pagos= Abonos::with('venta')->get();
+
+    return $pagos;
+
+    //datos para obtener los resultados
+    $fecha_inicio = Input::get('fecha_inicio');
+    $fecha_fin = Input::get('fecha_fin');
+    $tipo_polizas_id = Input::get('tipo_polizas_id');
+    $pagos_estado = Input::get('pagos_estado');
+    $rutas_id = Input::get('rutas_id');
+    $cobrador_id = Input::get('cobrador_id');
+    $tipo_ventas_id = Input::get('tipo_ventas_id');
+   // return $pagos;
+    $img = getB64Image($empresa[0]->logo);
+    // Obtener la extensión de la Imagen
+    $img_extension = getB64Extension($empresa[0]->logo);
+    // Crear un nombre aleatorio para la imagen
+    $img_name = 'logo' . time() . '.' . $img_extension;
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
+    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // segundo parametro
+    Storage::disk('images_base64')->put($img_name, $img);
+    $file = storage_path('app/images_base64/' . $img_name);
+    $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file'))->setPaper('a4');
+    return $pdf->stream('archivo.pdf');
+  }
+
 }
