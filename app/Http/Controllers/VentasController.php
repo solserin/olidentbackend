@@ -211,22 +211,66 @@ class VentasController extends ApiController
     return $resultado;
   }
 
+  
+
   //REPORTES DE PAGOS
   public function reporte_especifico_pagos(){
     $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
+
+     //datos para obtener los resultados
+   $fecha_inicio = Input::get('fecha_inicio');
+   $fecha_fin = Input::get('fecha_fin');
+   $tipo_polizas_id = Input::get('tipo_polizas_id');
+   $pagos_estado = Input::get('pagos_estado');
+   $rutas_id = Input::get('rutas_id');
+   $cobrador_id = Input::get('cobrador_id');
+   $tipo_ventas_id=Input::get('tipo_ventas_id');
+
+   //return $tipo_ventas_id;
     //obtengo la lista de informacion
-    $pagos= Abonos::with('venta')->get();
+    $pagos= Abonos::
+    select('rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name','fecha_abono','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
+    ->join('users', 'abonos.cobrador_id', '=', 'users.id')
+    ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
+    ->join('tipos_venta', 'ventas.tipos_venta_id', '=', 'tipos_venta.id')
+    ->join('polizas', 'ventas.polizas_id', '=', 'polizas.num_poliza')
+    ->join('rutas', 'rutas.id', '=', 'polizas.rutas_id')
+    ->join('tipo_polizas', 'ventas.tipo_polizas_id', '=', 'tipo_polizas.id')
+    ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'polizas.num_poliza')
+    ->where('beneficiarios.tipo_beneficiarios_id','=','1')
+    ->where('fecha_abono','>=',$fecha_inicio)
+    ->where('fecha_abono','<=',$fecha_fin)
+    //->where('tipos_venta.id',$tipo_ventas_id)
+    ->where(function ($q) use($tipo_ventas_id) {
+      if ($tipo_ventas_id) {
+          $q->where('tipos_venta.id', $tipo_ventas_id);
+      }
+    })
+    ->where(function ($q) use($tipo_polizas_id) {
+      if ($tipo_polizas_id) {
+          $q->where('tipo_polizas.id', $tipo_polizas_id);
+      }
+    })
+    ->where(function ($q) use($pagos_estado) {
+      if ($pagos_estado!="") {
+          $q->where('abonos.status', $pagos_estado);
+      }
+    })
+    ->where(function ($q) use($rutas_id) {
+      if ($rutas_id!="") {
+          $q->where('rutas.id', $rutas_id);
+      }
+    })
+    ->where(function ($q) use($cobrador_id) {
+      if ($cobrador_id!="") {
+          $q->where('abonos.cobrador_id', $cobrador_id);
+      }
+    })
+    ->get();
+    //return $pagos;
 
-    return $pagos;
 
-    //datos para obtener los resultados
-    $fecha_inicio = Input::get('fecha_inicio');
-    $fecha_fin = Input::get('fecha_fin');
-    $tipo_polizas_id = Input::get('tipo_polizas_id');
-    $pagos_estado = Input::get('pagos_estado');
-    $rutas_id = Input::get('rutas_id');
-    $cobrador_id = Input::get('cobrador_id');
-    $tipo_ventas_id = Input::get('tipo_ventas_id');
+   
    // return $pagos;
     $img = getB64Image($empresa[0]->logo);
     // Obtener la extensión de la Imagen
@@ -238,7 +282,7 @@ class VentasController extends ApiController
     // segundo parametro
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
-    $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file'))->setPaper('a4');
+    $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file','pagos'))->setPaper('a4','landscape');
     return $pdf->stream('archivo.pdf');
   }
 
