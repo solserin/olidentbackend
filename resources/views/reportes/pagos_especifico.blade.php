@@ -284,7 +284,7 @@ footer {
                             @endif
                     @endif
                 @endforeach
-                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:18px !important;">
+                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:14px !important;">
                         <td style="height:40px !important;" colspan="8" align="right">
                                 <strong>Total cobrado: </strong>
                             </td>
@@ -292,7 +292,7 @@ footer {
                                <strong>$ {{number_format(($total_cobrado),2,".",",")}}</strong>
                             </td>
                 </tr>
-                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:18px !important;">
+                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:14px !important;">
                         <td style="height:40px !important;" colspan="8" align="right">
                                 <strong>Total Cancelado: </strong>
                             </td>
@@ -300,7 +300,7 @@ footer {
                                <strong>$ {{number_format(($total_cancelado),2,".",",")}}</strong>
                             </td>
                 </tr>
-                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:18px !important;">
+                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:14px !important;">
                         <td style="height:80px !important;" colspan="8" align="right">
                                 <strong>Total General: </strong>
                             </td>
