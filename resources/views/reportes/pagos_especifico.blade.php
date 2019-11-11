@@ -137,7 +137,7 @@ footer {
     @if ($pagos)
     <table width="100%">
             <tr>
-                <td><strong>Reporte:</strong>Reporte de Pagos</td> 
+                <td style="text-transform:uppercase;"><strong>Reporte de  Pagos Del: {{(fecha_abr($fecha_inicio))}} al {{(fecha_abr($fecha_fin))}}</strong></td> 
             </tr>
           </table>
           <br/>
@@ -155,16 +155,27 @@ footer {
                 <th align="center">Cantidad</th>
               </tr>
             </thead>
-           
             <tbody>
+                {{-- declaro las variables para los totales a calcular --}}
                 @php
                 ini_set('max_execution_time', 300); //300 seconds = 5 minutes
                 ini_set('memory_limit', '3000M'); //This might be too large, but depends on the data set
                     $total_cobrado=0;
+                    $total_cancelado=0;
+                    $total_general=0;
+                    $cobrado_cobrador=0;
+                    $cancelado_cobrador=0;
+                    $cobrado_ruta=0;
+                    $bucle_siguiente=0;
+                    $cobrador_id=0;
                 @endphp
                 @foreach ($pagos as $pago)
-                    <tr>
-                    <td align="center">{{$pago->id}}</td>
+                    <tr 
+                        @if($pago->status==0)
+                            style="color:red;"
+                        @endif
+                    >
+                        <td align="center">{{$pago->id}}</td>
                         <td align="center">{{strtolower(fecha_abr($pago->fecha_abono))}}</td>
                         <td align="center">{{$pago->nombre}}</td>
                         <td align="center">{{$pago->ruta}}</td>
@@ -174,15 +185,128 @@ footer {
                         <td align="center">{{$pago->tipoPoliza}}</td>
                         <td align="center">{{number_format($pago->cantidad,2,".",",")}}</td>
                     </tr>
+
                     @if ($pago->status==1)
                         @php
                             $total_cobrado+=$pago->cantidad;
                         @endphp
+                        @else
+                            $total_cancelado+=$pago->cantidad;
+                    @endif
+                    @php
+                        $cobrador_id=$pago->id_cobrador;
+                        $bucle_siguiente++;
+                    @endphp
+                    @if (!isset($pagos[$bucle_siguiente]))
+                        {{-- verifico si ya es el ultimo ciclo del foreach para poner el ultimo total del cobrador --}}
+                        @if ($pago->status==1)
+                            @php
+                                $cobrado_cobrador+=$pago->cantidad;
+                            @endphp
+                            @else
+                            @php
+                                $cancelado_cobrador+=$pago->cantidad;
+                            @endphp
+                        @endif
+                        <tr>
+                            <td style="height:20px !important;" colspan="8" align="right">
+                                <strong>Cobrado: </strong>
+                            </td>
+                            <td colspan="1" align="center" style="color:#000 !important;">
+                               <strong>{{number_format($cobrado_cobrador,2,".",",")}}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                                <td style="height:20px !important;" colspan="8" align="right">
+                                    <strong>Cancelado: </strong>
+                                </td>
+                                <td colspan="1" align="center" style="color:red !important;">
+                                   <strong>{{number_format($cancelado_cobrador,2,".",",")}}</strong>
+                                </td>
+                        </tr>
+                        <tr>
+                                <td style="height:40px !important;" colspan="8" align="right">
+                                    <strong>Total: </strong>
+                                </td>
+                                <td colspan="1" align="center" style="color:#000 !important;">
+                                   <strong>{{number_format(($cobrado_cobrador-$cancelado_cobrador),2,".",",")}}</strong>
+                                </td>
+                        </tr>
+                        @else
+                            @if ($pagos[$bucle_siguiente]->id_cobrador!=$cobrador_id)
+                            @if ($pago->status==1)
+                                @php
+                                    $cobrado_cobrador+=$pago->cantidad;
+                                @endphp
+                                @else
+                                @php
+                                    $cancelado_cobrador+=$pago->cantidad;
+                                @endphp
+                            @endif
+                                <tr>
+                                    <td style="height:20px !important;" colspan="8" align="right">
+                                        <strong>Cobrado: </strong>
+                                    </td>
+                                    <td colspan="1" align="center" style="color:#000 !important;">
+                                        <strong>{{number_format($cobrado_cobrador,2,".",",")}}</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                        <td style="height:20px !important;" colspan="8" align="right">
+                                            <strong>Cancelado: </strong>
+                                        </td>
+                                        <td colspan="1" align="center" style="color:red !important;">
+                                           <strong>{{number_format($cancelado_cobrador,2,".",",")}}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                            <td style="height:40px !important;" colspan="8" align="right">
+                                                <strong>Total: </strong>
+                                            </td>
+                                            <td colspan="1" align="center" style="color:#000 !important;">
+                                               <strong>{{number_format(($cobrado_cobrador-$cancelado_cobrador),2,".",",")}}</strong>
+                                            </td>
+                                    </tr>
+                                @php
+                                    $cobrado_cobrador=0;
+                                    $cancelado_cobrador=0;
+                                @endphp
+                                @else
+                                    @if ($pago->status==1)
+                                    @php
+                                        $cobrado_cobrador+=$pago->cantidad;
+                                    @endphp
+                                    @else
+                                    @php
+                                        $cancelado_cobrador+=$pago->cantidad;
+                                    @endphp
+                                 @endif
+                            @endif
                     @endif
                 @endforeach
-                <tr>
-                    <td colspan="8" align="right"></td>
-                    <td colspan="1" align="right">{{number_format($total_cobrado,2,".",",")}}</td>
+                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:18px !important;">
+                        <td style="height:40px !important;" colspan="8" align="right">
+                                <strong>Total cobrado: </strong>
+                            </td>
+                            <td colspan="1" align="center">
+                               <strong>$ {{number_format(($total_cobrado),2,".",",")}}</strong>
+                            </td>
+                </tr>
+                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:18px !important;">
+                        <td style="height:40px !important;" colspan="8" align="right">
+                                <strong>Total Cancelado: </strong>
+                            </td>
+                            <td colspan="1" align="center" style="color:red !important;">
+                               <strong>$ {{number_format(($total_cancelado),2,".",",")}}</strong>
+                            </td>
+                </tr>
+                <tr style="background-color:#28a745  !important; color:#fff !important; font-size:18px !important;">
+                        <td style="height:80px !important;" colspan="8" align="right">
+                                <strong>Total General: </strong>
+                            </td>
+                            <td colspan="1" align="center">
+                               <strong>$ {{number_format(($total_cobrado-$total_cancelado),2,".",",")}}</strong>
+                            </td>
                 </tr>
             </tbody>
           </table>

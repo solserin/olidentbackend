@@ -229,7 +229,7 @@ class VentasController extends ApiController
    //return $tipo_ventas_id;
     //obtengo la lista de informacion
     $pagos= Abonos::
-    select('rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name','fecha_abono','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
+    select('abonos.cobrador_id as id_cobrador','rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name','fecha_abono','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
     ->join('users', 'abonos.cobrador_id', '=', 'users.id')
     ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
     ->join('tipos_venta', 'ventas.tipos_venta_id', '=', 'tipos_venta.id')
@@ -266,11 +266,12 @@ class VentasController extends ApiController
           $q->where('abonos.cobrador_id', $cobrador_id);
       }
     })
+    //->orderBy('rutas.id', 'asc')
+    ->orderBy('abonos.cobrador_id', 'asc')
     ->get();
     //return $pagos;
-
-
    
+    
    // return $pagos;
     $img = getB64Image($empresa[0]->logo);
     // Obtener la extensión de la Imagen
@@ -282,7 +283,7 @@ class VentasController extends ApiController
     // segundo parametro
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
-    $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file','pagos'))->setPaper('a4','landscape');
+    $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file','pagos','fecha_inicio','fecha_fin'))->setPaper('a4','landscape');
     return $pdf->stream('archivo.pdf');
   }
 
