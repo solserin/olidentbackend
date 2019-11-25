@@ -98,3 +98,8 @@ Route::get('ventas/reporte_especifico_pagos', 'VentasController@reporte_especifi
 
 
 Route::resource('ventas', 'VentasController',['only'=>['index','show','store','update','destroy']]);
+
+
+
+
+//nuevas rutas del proyecto
