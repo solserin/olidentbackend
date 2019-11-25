@@ -23,6 +23,7 @@ class EmpresasController extends ApiController
         //
     }
 
+    
     /**
      * Show the form for creating a new resource.
      *

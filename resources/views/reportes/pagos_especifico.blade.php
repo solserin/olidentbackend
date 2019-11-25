@@ -223,6 +223,10 @@ footer {
                                 <td colspan="1" align="center" style="color:red !important;">
                                    <strong>{{number_format($cancelado_cobrador,2,".",",")}}</strong>
                                 </td>
+                                @php
+                                    //aqui voy sumando el total cancelado
+                                    $total_cancelado+=$cancelado_cobrador;
+                                @endphp
                         </tr>
                         <tr>
                                 <td style="height:40px !important;" colspan="8" align="right">
@@ -258,6 +262,10 @@ footer {
                                         <td colspan="1" align="center" style="color:red !important;">
                                            <strong>{{number_format($cancelado_cobrador,2,".",",")}}</strong>
                                         </td>
+                                        @php
+                                            //aqui voy sumando el total cancelado
+                                            $total_cancelado+=$cancelado_cobrador;
+                                        @endphp
                                     </tr>
                                     <tr>
                                             <td style="height:40px !important;" colspan="8" align="right">
