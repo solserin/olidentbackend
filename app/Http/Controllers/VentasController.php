@@ -224,7 +224,9 @@ class VentasController extends ApiController
    $pagos_estado = Input::get('pagos_estado');
    $rutas_id = Input::get('rutas_id');
    $cobrador_id = Input::get('cobrador_id');
+   $capturo_id = Input::get('capturo_id');
    $tipo_ventas_id=Input::get('tipo_ventas_id');
+   $fecha_captura = Input::get('fecha_captura');
 
    //return $tipo_ventas_id;
     //obtengo la lista de informacion
@@ -266,11 +268,20 @@ class VentasController extends ApiController
           $q->where('abonos.cobrador_id', $cobrador_id);
       }
     })
+    ->where(function ($q) use($capturo_id) {
+      if ($capturo_id!="") {
+          $q->where('abonos.usuario_capturo_id', $capturo_id);
+      }
+    })
+    ->where(function ($q) use($fecha_captura) {
+      if ($fecha_captura!="") {
+          $q->where('abonos.fecha_registro', $fecha_captura);
+      }
+    })
     //->orderBy('rutas.id', 'asc')
     ->orderBy('abonos.cobrador_id', 'asc')
     ->get();
     //return $pagos;
-   
     
    // return $pagos;
     $img = getB64Image($empresa[0]->logo);
