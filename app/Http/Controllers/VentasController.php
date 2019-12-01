@@ -283,7 +283,7 @@ class VentasController extends ApiController
     ->get();
     return $pagos;
     
-   // return $pagos;
+    // return $pagos;
     $img = getB64Image($empresa[0]->logo);
     // Obtener la extensión de la Imagen
     $img_extension = getB64Extension($empresa[0]->logo);
