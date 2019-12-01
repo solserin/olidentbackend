@@ -224,12 +224,14 @@ class VentasController extends ApiController
    $pagos_estado = Input::get('pagos_estado');
    $rutas_id = Input::get('rutas_id');
    $cobrador_id = Input::get('cobrador_id');
+   $capturo_id = Input::get('capturo_id');
    $tipo_ventas_id=Input::get('tipo_ventas_id');
-
+   $fecha_captura = Input::get('fecha_captura');
+  
    //return $tipo_ventas_id;
     //obtengo la lista de informacion
     $pagos= Abonos::
-    select('abonos.cobrador_id as id_cobrador','rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name','fecha_abono','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
+    select('abonos.cobrador_id as id_cobrador','rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name',DB::raw("(select name from users where id=abonos.usuario_capturo_id) as capturista"),'fecha_abono','abonos.fecha_registro as fecha_captura','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
     ->join('users', 'abonos.cobrador_id', '=', 'users.id')
     ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
     ->join('tipos_venta', 'ventas.tipos_venta_id', '=', 'tipos_venta.id')
@@ -266,11 +268,20 @@ class VentasController extends ApiController
           $q->where('abonos.cobrador_id', $cobrador_id);
       }
     })
+    ->where(function ($q) use($capturo_id) {
+      if ($capturo_id!="") {
+          $q->where('abonos.usuario_capturo_id', $capturo_id);
+      }
+    })
+    ->where(function ($q) use($fecha_captura) {
+      if (trim($fecha_captura)!="") {
+          $q->where('abonos.fecha_registro', $fecha_captura);
+      }
+    })
     //->orderBy('rutas.id', 'asc')
     ->orderBy('abonos.cobrador_id', 'asc')
     ->get();
-    //return $pagos;
-   
+    return $pagos;
     
    // return $pagos;
     $img = getB64Image($empresa[0]->logo);
