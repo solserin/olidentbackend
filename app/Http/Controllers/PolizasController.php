@@ -473,7 +473,26 @@ class PolizasController extends ApiController
     // segundo parametro
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
-    $pdf = PDF::loadView('polizas/reporte_grafica_cobranza', compact('cobrado','cancelado','total','datos','nombres','empresa', 'file','grafica_ingresos_todos_los_cobradores'))->setPaper('a4','landscape');
+
+    //creo la imagen de la grafica
+    //eliminos los archivos anteriores
+    $files = Storage::disk('reporte_graficas')->files();
+    foreach ($files as $fi) {
+      Storage::disk('reporte_graficas')->delete($fi);
+    }
+    // Obtener los datos de la imagen
+    $img = getB64Image($grafica_ingresos_todos_los_cobradores);
+    // Obtener la extensión de la Imagen
+    $img_extension = getB64Extension($grafica_ingresos_todos_los_cobradores);
+    // Crear un nombre aleatorio para la imagen
+    $img_name = 'grafica' . time() . '.' . $img_extension;
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
+    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // segundo parametro
+    Storage::disk('reporte_graficas')->put($img_name, $img);
+    $grafica = storage_path('app/reporte_graficas/' . $img_name);
+    //fin de crear la grafica
+    $pdf = PDF::loadView('polizas/reporte_grafica_cobranza', compact('cobrado','cancelado','total','datos','nombres','empresa', 'file','grafica'))->setPaper('a4','landscape');
     return $pdf->download('archivo.pdf');
   }
 }
