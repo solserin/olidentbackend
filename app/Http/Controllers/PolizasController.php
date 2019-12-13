@@ -474,6 +474,6 @@ class PolizasController extends ApiController
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
     $pdf = PDF::loadView('polizas/reporte_grafica_cobranza', compact('cobrado','cancelado','total','datos','nombres','empresa', 'file','grafica_ingresos_todos_los_cobradores'))->setPaper('a4','landscape');
-    return $pdf->stream('archivo.pdf');
+    return $pdf->download('archivo.pdf');
   }
 }
