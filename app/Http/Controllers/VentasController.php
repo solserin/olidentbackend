@@ -215,7 +215,7 @@ class VentasController extends ApiController
 
   //REPORTES DE PAGOS
   public function reporte_especifico_pagos(){
-    $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
+  $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
 
      //datos para obtener los resultados
    $fecha_inicio = Input::get('fecha_inicio');
@@ -227,11 +227,12 @@ class VentasController extends ApiController
    $capturo_id = Input::get('capturo_id');
    $tipo_ventas_id=Input::get('tipo_ventas_id');
    $fecha_captura = Input::get('fecha_captura');
+
   
    //return $tipo_ventas_id;
     //obtengo la lista de informacion
     $pagos= Abonos::
-    select('abonos.cobrador_id as id_cobrador','rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name',DB::raw("(select name from users where id=abonos.usuario_capturo_id) as capturista"),'fecha_abono','abonos.fecha_registro as fecha_captura','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
+    select('polizas.num_poliza','abonos.cobrador_id as id_cobrador','rutas.ruta','tipo_polizas.tipo as tipoPoliza','tipos_venta.tipo as tipoVenta','ventas.id as ventaId','beneficiarios.nombre','abonos.id','name',DB::raw("(select name from users where id=abonos.usuario_capturo_id) as capturista"),'fecha_abono','abonos.fecha_registro as fecha_captura','cantidad','abonos.status','tipos_venta.id as tipos_venta_id','tipo_polizas.tipo')
     ->join('users', 'abonos.cobrador_id', '=', 'users.id')
     ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
     ->join('tipos_venta', 'ventas.tipos_venta_id', '=', 'tipos_venta.id')
@@ -281,21 +282,29 @@ class VentasController extends ApiController
     //->orderBy('rutas.id', 'asc')
     ->orderBy('abonos.cobrador_id', 'asc')
     ->get();
-    return $pagos;
+
+    //si no lo esta mandando imprimir retorna el json
+    if(!Input::get('imprimir')){
+      //retorna el json
+      return $pagos;
+    }else{
+      // return $pagos;
+      $img = getB64Image($empresa[0]->logo);
+      // Obtener la extensión de la Imagen
+      $img_extension = getB64Extension($empresa[0]->logo);
+      // Crear un nombre aleatorio para la imagen
+      $img_name = 'logo' . time() . '.' . $img_extension;
+      // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
+      // la función "put" el nombre de la imagen y los datos de la imagen como 
+      // segundo parametro
+      Storage::disk('images_base64')->put($img_name, $img);
+      $file = storage_path('app/images_base64/' . $img_name);
+      $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file','pagos','fecha_inicio','fecha_fin'))->setPaper('a4','landscape');
+      return $pdf->download('archivo.pdf');
+    }
     
-    // return $pagos;
-    $img = getB64Image($empresa[0]->logo);
-    // Obtener la extensión de la Imagen
-    $img_extension = getB64Extension($empresa[0]->logo);
-    // Crear un nombre aleatorio para la imagen
-    $img_name = 'logo' . time() . '.' . $img_extension;
-    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
-    // la función "put" el nombre de la imagen y los datos de la imagen como 
-    // segundo parametro
-    Storage::disk('images_base64')->put($img_name, $img);
-    $file = storage_path('app/images_base64/' . $img_name);
-    $pdf = PDF::loadView('reportes/pagos_especifico', compact('empresa', 'file','pagos','fecha_inicio','fecha_fin'))->setPaper('a4','landscape');
-    return $pdf->stream('archivo.pdf');
+    
+  
   }
 
 }

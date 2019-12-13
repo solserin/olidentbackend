@@ -443,4 +443,37 @@ class PolizasController extends ApiController
     $pdf = PDF::loadView('polizas/tarjeta_cobranza', compact('empresa', 'file', 'venta', 'localidad', 'estado_poliza_venta'))->setPaper('a4','landscape');
     return $pdf->stream('archivo.pdf');
   }
+
+
+  public function reporte_grafica_cobranza()
+  {
+    $grafica_ingresos_todos_los_cobradores = Input::post('ima');
+    $nombres = Input::post('nombres');
+    $datos = Input::post('datos');
+    $cobrado = Input::post('cobrado');
+    $cancelado = Input::post('cancelado');
+    $total = Input::post('total');
+    if (!Input::post('ima')) {
+      return $this->errorResponse('Error, esta URL no existe', 404);
+    }
+    //eliminos los archivos anteriores
+    $files = Storage::disk('images_base64')->files();
+    foreach ($files as $fi) {
+      Storage::disk('images_base64')->delete($fi);
+    }
+    $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
+    // Obtener los datos de la imagen
+    $img = getB64Image($empresa[0]->logo);
+    // Obtener la extensión de la Imagen
+    $img_extension = getB64Extension($empresa[0]->logo);
+    // Crear un nombre aleatorio para la imagen
+    $img_name = 'logo' . time() . '.' . $img_extension;
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
+    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // segundo parametro
+    Storage::disk('images_base64')->put($img_name, $img);
+    $file = storage_path('app/images_base64/' . $img_name);
+    $pdf = PDF::loadView('polizas/reporte_grafica_cobranza', compact('cobrado','cancelado','total','datos','nombres','empresa', 'file','grafica_ingresos_todos_los_cobradores'))->setPaper('a4','landscape');
+    return $pdf->stream('archivo.pdf');
+  }
 }
