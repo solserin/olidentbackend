@@ -288,6 +288,10 @@ class VentasController extends ApiController
       //retorna el json
       return $pagos;
     }else{
+      $files = Storage::disk('reporte_graficas')->files();
+      foreach ($files as $fi) {
+        Storage::disk('images_base64')->delete($fi);
+      }
       // return $pagos;
       $img = getB64Image($empresa[0]->logo);
       // Obtener la extensión de la Imagen
