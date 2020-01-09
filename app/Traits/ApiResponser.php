@@ -30,7 +30,7 @@ trait ApiResponser
     protected function paginate(Collection $collection)
     {
         $rules=[
-            'per_page'=>'integer|min:2|max:50'
+            'per_page'=>'integer|min:2|max:300'
         ];
         Validator::validate(request()->all(),$rules);
         //aqui sabemos cual segmento vamos a mostrar

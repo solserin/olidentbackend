@@ -98,7 +98,9 @@ Route::put('ventas/cancelar_pago/{pago_id}', 'VentasController@cancelar_pago');
 
 //reporte de pagos
 Route::get('ventas/reporte_especifico_pagos', 'VentasController@reporte_especifico_pagos');
-
+//ruta para descargar reporte de cobranza
+Route::get('ventas/reporte_cobranza', 'VentasController@reporte_cobranza');
+Route::get('ventas/ruta_completa', 'VentasController@ruta_completa');
 
 Route::resource('ventas', 'VentasController',['only'=>['index','show','store','update','destroy']]);
 

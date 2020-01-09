@@ -375,8 +375,8 @@ class PolizasController extends ApiController
     $img_extension = getB64Extension($empresa[0]->logo);
     // Crear un nombre aleatorio para la imagen
     $img_name = 'logo' . time() . '.' . $img_extension;
-    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
-    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+    // la función "put" el nombre de la imagen y los datos de la imagen como
     // segundo parametro
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
@@ -435,8 +435,8 @@ class PolizasController extends ApiController
     $img_extension = getB64Extension($empresa[0]->logo);
     // Crear un nombre aleatorio para la imagen
     $img_name = 'logo' . time() . '.' . $img_extension;
-    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
-    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+    // la función "put" el nombre de la imagen y los datos de la imagen como
     // segundo parametro
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
@@ -468,8 +468,8 @@ class PolizasController extends ApiController
     $img_extension = getB64Extension($empresa[0]->logo);
     // Crear un nombre aleatorio para la imagen
     $img_name = 'logo' . time() . '.' . $img_extension;
-    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
-    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+    // la función "put" el nombre de la imagen y los datos de la imagen como
     // segundo parametro
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
@@ -486,8 +486,8 @@ class PolizasController extends ApiController
     $img_extension = getB64Extension($grafica_ingresos_todos_los_cobradores);
     // Crear un nombre aleatorio para la imagen
     $img_name = 'grafica' . time() . '.' . $img_extension;
-    // Usando el Storage guardar en el disco creado anteriormente y pasandole a 
-    // la función "put" el nombre de la imagen y los datos de la imagen como 
+    // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+    // la función "put" el nombre de la imagen y los datos de la imagen como
     // segundo parametro
     Storage::disk('reporte_graficas')->put($img_name, $img);
     $grafica = storage_path('app/reporte_graficas/' . $img_name);
