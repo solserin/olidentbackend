@@ -318,8 +318,6 @@ class VentasController extends ApiController
         $fecha_inicio = Input::get('fecha_inicio');
         $fecha_fin = Input::get('fecha_fin');
         $rutas_id = Input::get('rutas_id');
-
-
         //return $tipo_ventas_id;
         //obtengo la lista de informacion
         $pagos = Abonos::select('name','ventas.total','ventas.abonado','ventas.restante','ventas.id as idVenta', 'fecha_abono', 'ventas.polizas_id', 'beneficiarios.nombre', 'ventas.total', 'ruta', 'abonos.id as aid','fecha_abono as fab', DB::raw("(select @importe:=(ventas.total-IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as importe,(@importe)-cantidad as saldo"),DB::raw("(select @cuantos:=(count(abonos.id)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as cuantos"), 'cantidad',DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta"))
@@ -381,7 +379,7 @@ class VentasController extends ApiController
              // segundo parametro
              Storage::disk('images_base64')->put($img_name, $img);
              $file = storage_path('app/images_base64/' . $img_name);
-             $pdf = PDF::set_option("isPhpEnabled", true)->loadView('reportes/reporte_cobranza', compact('empresa', 'file','total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
+             $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa', 'file','total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
              return $pdf->stream('archivo.pdf');
 
         }
@@ -394,7 +392,7 @@ class VentasController extends ApiController
         //datos para obtener los resultados
         $rutas_id = Input::get('rutas_id');
         $polizas=Polizas::
-        select('polizas.id','num_poliza','rutas_id','ruta')
+        select('polizas.id','num_poliza','rutas_id','ruta','name')
         ->with(
             array('ventas' => function ($query) {
                 $query->select('ventas.polizas_id','ventas.id','nombre','total','abonado','restante','fecha_venta','fecha_vencimiento')
@@ -404,6 +402,7 @@ class VentasController extends ApiController
             })
         )
         ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
+        ->join('users', 'rutas.cobrador_id', '=', 'users.id')
         ->where('rutas_id', '=',  $rutas_id)
         //->where('polizas.num_poliza', '=', 874)
         ->orderBy('num_poliza', 'desc')
@@ -412,6 +411,32 @@ class VentasController extends ApiController
         if (!Input::get('imprimir')) {
             //retorna el json
             return $this->showAllPaginated($polizas);
+        }else{
+            //calculo el valor de la ruta
+            $total_ruta=0;
+            $recuperado=0;
+            $venta_ruta=0;
+            foreach ($polizas as $poliza) {
+                $total_ruta=$total_ruta+$poliza->ventas[0]->restante;
+                $recuperado=$recuperado+$poliza->ventas[0]->abonado;
+                $venta_ruta=$venta_ruta+$poliza->ventas[0]->total;
+            }
+             //fin de calculo para la ruta
+
+            //si se va imprimir
+             $img = getB64Image($empresa[0]->logo);
+             // Obtener la extensión de la Imagen
+             $img_extension = getB64Extension($empresa[0]->logo);
+             // Crear un nombre aleatorio para la imagen
+             $img_name = 'logo' . time() . '.' . $img_extension;
+             // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+             // la función "put" el nombre de la imagen y los datos de la imagen como
+             // segundo parametro
+             Storage::disk('images_base64')->put($img_name, $img);
+             $file = storage_path('app/images_base64/' . $img_name);
+             $pdf = PDF::loadView('reportes/ruta_completa', compact('empresa', 'file','total_ruta', 'polizas','recuperado','venta_ruta'))->setPaper('a4', 'portrait');
+             return $pdf->stream('archivo.pdf');
+
         }
     }
 }

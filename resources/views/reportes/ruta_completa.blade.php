@@ -143,27 +143,60 @@ footer{
                 <tr>
                     <td align="center">
                         <h3>CLÍNICA OLI-DENT S.R.L de C.V.</h3>
-                        <p>{{$pagos[0]->name}} - {{$pagos[0]->ruta}}</p>
-                        <p><strong>Reporte de Cobranza Del: {{(fecha_abr($fecha_inicio))}} al {{(fecha_abr($fecha_fin))}}</strong></p>
+                        <p>{{$polizas[0]->name}} - {{$polizas[0]->ruta}}</p>
                         <p>Actualizado para el día {{fechahora_completa()}}.</p>
                     </td>
                 </tr>
             </table>
     </div>
+
+    <div>
+        <table width="100%" id="encabezado">
+            <tr>
+                <td style="height:20px !important;" colspan="6" align="right">
+                    <strong>($) Total de venta de ruta: </strong>
+                </td>
+                <td colspan="1" align="center" style="color:#000 !important;">
+
+                   <strong>{{number_format($venta_ruta,2,".",",")}}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="height:20px !important;" colspan="6" align="right">
+                    <strong>($) Cobrado: </strong>
+                </td>
+                @php
+                $porcentaje_recuperado=(100*$recuperado)/$total_ruta;
+            @endphp
+                <td colspan="1" align="center" style="color:#000 !important;">
+                   <strong>{{number_format($recuperado,2,".",",")}} ({{number_format($porcentaje_recuperado,2,".",",")}} %)</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="height:20px !important;" colspan="6" align="right">
+                    <strong>($) Saldo restante de la ruta: </strong>
+                </td>
+                <td colspan="1" align="center" style="color:#000 !important;">
+                   <strong>{{number_format($total_ruta,2,".",",")}}</strong>
+                </td>
+            </tr>
+        </table>
+
+    </div>
     <footer>
         Pág. <span class="pagenum"></span>
     </footer>
-    @if ($pagos)
+    @if ($polizas)
           <br/>
           <table width="100%" id="datos">
             <thead style="background-color: #1675ab; color:#fff;">
               <tr>
                 <th align="center">#</th>
                 <th align="center">Póliza</th>
-                <th align="center">Fecha</th>
+                <th align="center">Fecha Venta</th>
                 <th align="center">Titular</th>
-                <th align="center">($) Importe</th>
-                <th align="center">($) Abono</th>
+                <th align="center">($) Total</th>
+                <th align="center">($) Abonado</th>
                 <th align="center">($) Saldo</th>
               </tr>
             </thead>
@@ -172,30 +205,40 @@ footer{
                 @php
                 ini_set('max_execution_time', 300); //300 seconds = 5 minutes
                 ini_set('memory_limit', '6000M'); //This might be too large, but depends on the data set
-                    $cobrado_ruta=0;
                     $x=1;
                 @endphp
-                @foreach ($pagos as $pago)
+                @foreach ($polizas as $poliza)
                     <tr>
                         <td align="center">{{$x}}</td>
-                        <td align="center">{{$pago->polizas_id}}</td>
-                        <td align="center">{{strtolower(fecha_abr($pago->fecha_abono))}}</td>
-                        <td align="center">{{$pago->nombre}}</td>
-                        <td align="center">{{number_format($pago->importe,2,".",",")}}</td>
-                        <td align="center">{{number_format($pago->cantidad,2,".",",")}}</td>
-                        <td align="center">{{number_format($pago->saldo,2,".",",")}}</td>
+                        <td align="center">{{$poliza->num_poliza}}</td>
+                        <td align="center">{{strtolower(fecha_abr($poliza->ventas[0]->fecha_venta))}}</td>
+                        <td align="center">{{$poliza->ventas[0]->nombre}}</td>
+                        <td align="center">{{number_format($poliza->ventas[0]->total,2,".",",")}}</td>
+                        <td align="center">{{number_format($poliza->ventas[0]->abonado,2,".",",")}}</td>
+                        <td align="center">{{number_format($poliza->ventas[0]->restante,2,".",",")}}</td>
                     </tr>
                     @php
-                        $cobrado_ruta+=$pago->cantidad;
                         $x+=1;
                     @endphp
                 @endforeach
                 <tr>
                     <td style="height:20px !important;" colspan="6" align="right">
-                        <strong>($) Cobrado: </strong>
+                        <strong>($) Total de venta de ruta: </strong>
                     </td>
                     <td colspan="1" align="center" style="color:#000 !important;">
-                       <strong>{{number_format($cobrado_ruta,2,".",",")}}</strong>
+
+                       <strong>{{number_format($venta_ruta,2,".",",")}}</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="height:20px !important;" colspan="6" align="right">
+                        <strong>($) Cobrado: </strong>
+                    </td>
+                    @php
+                    $porcentaje_recuperado=(100*$recuperado)/$total_ruta;
+                @endphp
+                    <td colspan="1" align="center" style="color:#000 !important;">
+                       <strong>{{number_format($recuperado,2,".",",")}} ({{number_format($porcentaje_recuperado,2,".",",")}} %)</strong>
                     </td>
                 </tr>
                 <tr>
@@ -204,17 +247,6 @@ footer{
                     </td>
                     <td colspan="1" align="center" style="color:#000 !important;">
                        <strong>{{number_format($total_ruta,2,".",",")}}</strong>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="height:20px !important;" colspan="6" align="right">
-                        <strong>(%) Recuperado en el periodo de cobranza: </strong>
-                    </td>
-                    <td colspan="1" align="center" style="color:#000 !important;">
-                        @php
-                            $porcentaje_recuperado=(100*$cobrado_ruta)/$total_ruta;
-                        @endphp
-                       <strong>{{number_format($porcentaje_recuperado,2,".",",")}} %</strong>
                     </td>
                 </tr>
             </tbody>
