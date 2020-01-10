@@ -1,19 +1,21 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Abonos;
 use App\Ventas;
 use App\Polizas;
 use App\Localidades;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use PhpParser\Node\Stmt\Foreach_;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\Api\ApiController;
-use PhpParser\Node\Stmt\Foreach_;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class VentasController extends ApiController
 {
@@ -421,22 +423,250 @@ class VentasController extends ApiController
                 $recuperado=$recuperado+$poliza->ventas[0]->abonado;
                 $venta_ruta=$venta_ruta+$poliza->ventas[0]->total;
             }
-             //fin de calculo para la ruta
+        //fin de calculo para la ruta
+         $nombre_reporte="Ruta ";
+        if(count($polizas)>0){
+            $nombre_reporte.=$polizas[0]->ruta;
+        }
+
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getProperties()
+        ->setCreator('CLÍNICA OLI-DENT S.R.L de C.V')
+        ->setTitle("Reporte de ruta completa")
+        ->setSubject("Reporte de ruta completa")
+        ->setDescription("Lista de polizas de la ruta")
+        ->setCategory("Reportes de aseguradora");
+
+        $spreadsheet->setActiveSheetIndex(0);
+        // Renombrar Hoja
+        $spreadsheet->getActiveSheet()->setTitle($nombre_reporte);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        //header del reporte
+        $estilo_header = [
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE
+                ]
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => [ 'rgb' => 'FFFFFFFF' ]
+                ],
+                'bottom' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => [ 'rgb' => 'FFFFFFFF' ]
+                ],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [
+                    'argb' => '1675ab',
+                ],
+            ]
+        ];
+        $spreadsheet->getActiveSheet()->getStyle('A1'.':F3')->applyFromArray($estilo_header);
+        $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
+        $sheet->setCellValue('A1', 'CLÍNICA OLI-DENT S.R.L de C.V.');
+        $spreadsheet->getActiveSheet()->mergeCells('A2:F2');
+        $sheet->setCellValue('A2', strtoupper($polizas[0]->name.'-'.$polizas[0]->ruta));
+        $spreadsheet->getActiveSheet()->mergeCells('A3:F3');
+        $sheet->setCellValue('A3', strtoupper('Actualizado para el día '.fechahora_completa()));
+        //fin header datos de la empresa
+
+        $inicio_headers=9;
+        $header_inicio=$inicio_headers+1;
+
+
+        $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($estilo_header);
+
+        $sheet->setCellValue('A'.$inicio_headers, 'Póliza');
+        $sheet->setCellValue('B'.$inicio_headers, 'Fecha Venta');
+        $sheet->setCellValue('C'.$inicio_headers, 'Titular');
+        $sheet->setCellValue('D'.$inicio_headers, 'Importe');
+        $sheet->setCellValue('E'.$inicio_headers, 'Abonado');
+        $sheet->setCellValue('F'.$inicio_headers, 'Saldo');
+
+        //escribiendo los datos
+        $estilo_stripping = [
+            'borders' => [
+                'top' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => [ 'rgb' => 'FFFFFFFF' ]
+                ],
+                'bottom' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => [ 'rgb' => 'FFFFFFFF' ]
+                ],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [
+                    'argb' => 'd2e4ee',
+                ],
+            ]
+        ];
+        $alineacion = [
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+        ];
+        $inicio_headers+=1;
+        foreach ($polizas as $poliza) {
+            $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($alineacion);
+            $sheet->setCellValue('A'.$inicio_headers, $poliza->num_poliza);
+            $sheet->setCellValue('B'.$inicio_headers, $poliza->ventas[0]->fecha_venta);
+            $sheet->setCellValue('C'.$inicio_headers, $poliza->ventas[0]->nombre);
+            $sheet->setCellValue('D'.$inicio_headers, $poliza->ventas[0]->total);
+            $spreadsheet->getActiveSheet()->getStyle('D'.$inicio_headers.':F'.$inicio_headers)->applyFromArray(
+                [
+                    'numberFormat' => [
+                        'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                    ],
+                ]
+            );
+            $sheet->setCellValue('E'.$inicio_headers, $poliza->ventas[0]->abonado);
+            $sheet->setCellValue('F'.$inicio_headers, $poliza->ventas[0]->restante);
+            $inicio_headers+=1;
+
+            if(($inicio_headers%2)==1){
+                $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($estilo_stripping);
+            }
+        }
+
+
+        //totales y resumen en el header y footer
+        $spreadsheet->getActiveSheet()->getStyle('D'.($inicio_headers+1).':F'.($inicio_headers+1))->applyFromArray($estilo_stripping);
+        $spreadsheet->getActiveSheet()->getStyle('D'.($inicio_headers+2).':F'.($inicio_headers+2))->applyFromArray($estilo_stripping);
+        $spreadsheet->getActiveSheet()->getStyle('D'.($inicio_headers+3).':F'.($inicio_headers+3))->applyFromArray($estilo_stripping);
+
+        $spreadsheet->getActiveSheet()->mergeCells('D'.($inicio_headers+1).':E'.($inicio_headers+1));
+        $spreadsheet->getActiveSheet()->mergeCells('D'.($inicio_headers+2).':E'.($inicio_headers+2));
+        $spreadsheet->getActiveSheet()->mergeCells('D'.($inicio_headers+3).':E'.($inicio_headers+3));
+
+        $sheet->setCellValue('D'.($inicio_headers+1), strtoupper('VALOR DE LA RUTA: '));
+        $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+1))->applyFromArray(
+            [
+                'numberFormat' => [
+                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                ],
+            ]
+        );
+        $sheet->setCellValue('F'.($inicio_headers+1),'=SUM(D'.$header_inicio.':D'.($inicio_headers-1).')');
+        $sheet->setCellValue('D'.($inicio_headers+2), strtoupper('COBRADO: '));
+        $sheet->setCellValue('F'.($inicio_headers+2),'=SUM(E'.$header_inicio.':E'.($inicio_headers-1).')');
+        $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+2))->applyFromArray(
+            [
+                'numberFormat' => [
+                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                ],
+            ]
+        );
+        $sheet->setCellValue('D'.($inicio_headers+3), strtoupper('RESTANTE: '));
+        $sheet->setCellValue('F'.($inicio_headers+3),'=SUM(F'.$header_inicio.':F'.($inicio_headers-1).')');
+        $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+3))->applyFromArray(
+            [
+                'numberFormat' => [
+                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                ],
+            ]
+        );
+        //fin en el footer
+        //incio del header
+        $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray($estilo_stripping);
+        $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray(
+            [
+                'numberFormat' => [
+                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                ],
+            ]
+        );
+        $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray($estilo_stripping);
+        $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray(
+            [
+                'numberFormat' => [
+                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                ],
+            ]
+        );
+        $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray($estilo_stripping);
+        $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray(
+            [
+                'numberFormat' => [
+                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                ],
+            ]
+        );
+        $spreadsheet->getActiveSheet()->mergeCells('D5:E5');
+        $sheet->setCellValue('D5', strtoupper('VALOR DE LA RUTA: ')); $sheet->setCellValue('F5', '=F'.($inicio_headers+1));
+        $spreadsheet->getActiveSheet()->mergeCells('D6:E6');$sheet->setCellValue('F6', '=F'.($inicio_headers+2));
+        $sheet->setCellValue('D6', strtoupper('COBRADO: '));
+        $spreadsheet->getActiveSheet()->mergeCells('D7:E7');$sheet->setCellValue('F7', '=F'.($inicio_headers+3));
+        $sheet->setCellValue('D7', strtoupper('RESTANTE: '));
+        //fin de totales y resumen
+
+
+
+        //sacando los totales
+
+
+
+
+        $spreadsheet->getActiveSheet()->getColumnDimension("A")
+        ->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension("B")
+        ->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension("C")
+        ->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension("D")
+        ->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension("F")
+        ->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension("G")
+        ->setAutoSize(true);
+
+        $nombre_reporte="Ruta ";
+        if(count($polizas)>0){
+            $nombre_reporte.=$polizas[0]->ruta;
+        }
+            $nombre_reporte.=" ".fechahora_completa();
+
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('export.xlsx');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="'.$nombre_reporte.'.xlsx"');
+        $writer->save("php://output");
+        exit;
+
+
 
             //si se va imprimir
-             $img = getB64Image($empresa[0]->logo);
+             //$img = getB64Image($empresa[0]->logo);
              // Obtener la extensión de la Imagen
-             $img_extension = getB64Extension($empresa[0]->logo);
+             //$img_extension = getB64Extension($empresa[0]->logo);
              // Crear un nombre aleatorio para la imagen
-             $img_name = 'logo' . time() . '.' . $img_extension;
+             //$img_name = 'logo' . time() . '.' . $img_extension;
              // Usando el Storage guardar en el disco creado anteriormente y pasandole a
              // la función "put" el nombre de la imagen y los datos de la imagen como
              // segundo parametro
-             Storage::disk('images_base64')->put($img_name, $img);
-             $file = storage_path('app/images_base64/' . $img_name);
-             $pdf = PDF::loadView('reportes/ruta_completa', compact('empresa', 'file','total_ruta', 'polizas','recuperado','venta_ruta'))->setPaper('a4', 'portrait');
-             return $pdf->stream('archivo.pdf');
+             //Storage::disk('images_base64')->put($img_name, $img);
+             //$file = storage_path('app/images_base64/' . $img_name);
+             //$pdf = PDF::loadView('reportes/ruta_completa', compact('empresa', 'file','total_ruta', 'polizas','recuperado','venta_ruta'))->setPaper('a4', 'portrait');
+             //return $pdf->stream('archivo.pdf');
 
         }
+
+    }
+
+    public function excel()
+    {
+
     }
 }
