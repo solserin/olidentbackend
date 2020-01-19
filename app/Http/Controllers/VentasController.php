@@ -322,7 +322,14 @@ class VentasController extends ApiController
         $rutas_id = Input::get('rutas_id');
         //return $tipo_ventas_id;
         //obtengo la lista de informacion
-        $pagos = Abonos::select('name','ventas.total','ventas.abonado','ventas.restante','ventas.id as idVenta', 'fecha_abono', 'ventas.polizas_id', 'beneficiarios.nombre', 'ventas.total', 'ruta', 'abonos.id as aid','fecha_abono as fab', DB::raw("(select @importe:=(ventas.total-IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as importe,(@importe)-cantidad as saldo"),DB::raw("(select @cuantos:=(count(abonos.id)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as cuantos"), 'cantidad',DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta"))
+        $pagos = Abonos::select('comision_vendedor','name','ventas.total','ventas.abonado',
+        'ventas.restante','ventas.id as idVenta', 'fecha_abono', 'ventas.polizas_id',
+         'beneficiarios.nombre', 'ventas.total', 'ruta', 'abonos.id as aid',
+         'fecha_abono as fab',
+         DB::raw("(select @importe:=((ventas.total-comision_vendedor)-IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as importe,(@importe)-cantidad as saldo"),
+         DB::raw("(select @cuantos:=(IFNULL(count(abonos.id),0)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as cuantos"), 'cantidad',
+         DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta"),
+         DB::raw("(select @enganche:=(IFNULL(abonos.cantidad,0)) from abonos where ventas_id=ventas.id and abonos.status=1 order by id asc limit 1) as enganche"),DB::raw("(select @enganche_id:=(abonos.id) from abonos where ventas_id=ventas.id and abonos.status=1 order by id asc limit 1) as enganche_id"))
             ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
             ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
             ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
