@@ -433,7 +433,7 @@ class VentasController extends ApiController
         select('polizas.id','num_poliza','rutas_id','ruta','name')
         ->with(
             array('ventas' => function ($query) {
-                $query->select('ventas.polizas_id','ventas.id','nombre','total','abonado','restante','fecha_venta','fecha_vencimiento')
+                $query->select('ventas.polizas_id','ventas.id','nombre','total','abonado','restante','fecha_venta','fecha_vencimiento','ventas.status')
                 ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
                 ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
                 ->orderBy('ventas.id', 'desc');
@@ -507,6 +507,17 @@ class VentasController extends ApiController
                 ],
             ]
         ];
+
+        $estilo_cancelados = [
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED
+                ]
+            ]
+        ];
+
+
         $spreadsheet->getActiveSheet()->getStyle('A1'.':F3')->applyFromArray($estilo_header);
         $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
         $sheet->setCellValue('A1', 'CLÍNICA OLI-DENT S.R.L de C.V.');
@@ -526,7 +537,7 @@ class VentasController extends ApiController
         $sheet->setCellValue('B'.$inicio_headers, 'Fecha Venta');
         $sheet->setCellValue('C'.$inicio_headers, 'Titular');
         $sheet->setCellValue('D'.$inicio_headers, 'Importe');
-        $sheet->setCellValue('E'.$inicio_headers, 'Abonado');
+        $sheet->setCellValue('E'.$inicio_headers, 'Pagado');
         $sheet->setCellValue('F'.$inicio_headers, 'Saldo');
 
         //escribiendo los datos
@@ -554,7 +565,10 @@ class VentasController extends ApiController
             ],
         ];
         $inicio_headers+=1;
+        $cancelado_total=0;
+        $restante=0;
         foreach ($polizas as $poliza) {
+
             $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($alineacion);
             $sheet->setCellValue('A'.$inicio_headers, $poliza->num_poliza);
             $sheet->setCellValue('B'.$inicio_headers, $poliza->ventas[0]->fecha_venta);
@@ -567,6 +581,15 @@ class VentasController extends ApiController
                     ],
                 ]
             );
+            if($poliza->ventas[0]->status==0){
+                /**calculo total cancelado y total restante */
+                $cancelado_total+=$poliza->ventas[0]->total;
+                $restante=$poliza->ventas[0]->restante;
+                $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray(
+                   $estilo_cancelados
+                );
+            }
+
             $sheet->setCellValue('E'.$inicio_headers, $poliza->ventas[0]->abonado);
             $sheet->setCellValue('F'.$inicio_headers, $poliza->ventas[0]->restante);
             $inicio_headers+=1;
@@ -594,7 +617,7 @@ class VentasController extends ApiController
                 ],
             ]
         );
-        $sheet->setCellValue('F'.($inicio_headers+1),'=SUM(D'.$header_inicio.':D'.($inicio_headers-1).')');
+        $sheet->setCellValue('F'.($inicio_headers+1),'=SUM(D'.$header_inicio.':D'.($inicio_headers-1).')-'.($cancelado_total));
         $sheet->setCellValue('D'.($inicio_headers+2), strtoupper('COBRADO: '));
         $sheet->setCellValue('F'.($inicio_headers+2),'=SUM(E'.$header_inicio.':E'.($inicio_headers-1).')');
         $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+2))->applyFromArray(
@@ -605,7 +628,7 @@ class VentasController extends ApiController
             ]
         );
         $sheet->setCellValue('D'.($inicio_headers+3), strtoupper('RESTANTE: '));
-        $sheet->setCellValue('F'.($inicio_headers+3),'=SUM(F'.$header_inicio.':F'.($inicio_headers-1).')');
+        $sheet->setCellValue('F'.($inicio_headers+3),'=SUM(F'.$header_inicio.':F'.($inicio_headers-1).')-'.($restante));
         $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+3))->applyFromArray(
             [
                 'numberFormat' => [
