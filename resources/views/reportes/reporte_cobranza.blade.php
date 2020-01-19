@@ -153,6 +153,13 @@ footer{
     <footer>
         Pág. <span class="pagenum"></span>
     </footer>
+    @if ($cobro_id!='')
+                            @if (count($pagos)>0)
+                            <p style="font-size:12px; text-transform:uppercase; font-weight:bold;text-align:center;">Abonos cobrados por: {{$pagos[0]->cobrador}}.</p>
+                            @endif
+                            @else
+                            <p style="font-size:12px; text-transform:uppercase; font-weight:bold;text-align:center;">Cobrado por todos los cobradores</p>
+                        @endif
     @if ($pagos)
           <br/>
           <table width="100%" id="datos">
@@ -176,6 +183,7 @@ footer{
                     $x=1;
                 @endphp
                 @foreach ($pagos as $pago)
+                @if ($pago->importe>0 && $pago->id_abo!=$pago->enganche_id)
                     <tr>
                         <td align="center">{{$x}}</td>
                         <td align="center">{{$pago->polizas_id}}</td>
@@ -189,7 +197,13 @@ footer{
                         $cobrado_ruta+=$pago->cantidad;
                         $x+=1;
                     @endphp
+                @endif
                 @endforeach
+                @php
+                /**AL TOTAL RESTANTE DE LA RUTA LE SUMO LO QUE SE CAPTURO ESTE PERIDO DE FECHAS*/
+                $total_ruta+=$cobrado_ruta;
+                $x+=1;
+                @endphp
                 <tr>
                     <td style="height:20px !important;" colspan="6" align="right">
                         <strong>($) Cobrado: </strong>
@@ -208,11 +222,11 @@ footer{
                 </tr>
                 <tr>
                     <td style="height:20px !important;" colspan="6" align="right">
-                        <strong>(%) Recuperado en el periodo de cobranza: </strong>
+                        <strong>(%) Recuperado en el periodo de cobranza sobre 10% de la ruta ({{number_format(($total_ruta/10),2,".",",")}}): </strong>
                     </td>
                     <td colspan="1" align="center" style="color:#000 !important;">
                         @php
-                            $porcentaje_recuperado=(100*$cobrado_ruta)/$total_ruta;
+                            $porcentaje_recuperado=(100*$cobrado_ruta)/($total_ruta/10);
                         @endphp
                        <strong>{{number_format($porcentaje_recuperado,2,".",",")}} %</strong>
                     </td>
