@@ -320,25 +320,61 @@ class VentasController extends ApiController
         $fecha_inicio = Input::get('fecha_inicio');
         $fecha_fin = Input::get('fecha_fin');
         $rutas_id = Input::get('rutas_id');
+        $cobro_id = Input::get('cobrador_id');
         //return $tipo_ventas_id;
         //obtengo la lista de informacion
-        $pagos = Abonos::select('name','ventas.total','ventas.abonado','ventas.restante','ventas.id as idVenta', 'fecha_abono', 'ventas.polizas_id', 'beneficiarios.nombre', 'ventas.total', 'ruta', 'abonos.id as aid','fecha_abono as fab', DB::raw("(select @importe:=(ventas.total-IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as importe,(@importe)-cantidad as saldo"),DB::raw("(select @cuantos:=(count(abonos.id)) from abonos where ventas_id=ventas.id and fecha_abono<fab and abonos.status=1 order by id asc) as cuantos"), 'cantidad',DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta"))
-            ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
+        $pagos = Abonos::select(
+        'name','ventas_id as idVenta', 'fecha_abono', 'ventas.polizas_id',
+         'beneficiarios.nombre', 'ventas.total', 'ruta', 'abonos.id as aid',
+         'fecha_abono as fab',
+         'abonos.id as id_abo',
+         'comision_vendedor',
+        'total as total_venta','abonado','restante',
+
+
+             /**NOMBRE DEL COBRADOR*/
+         DB::raw("(select @cobrador:=(name) from users where id=abonos.cobrador_id) as cobrador"),
+
+             /**ESTE ES EL ID DEL ENGANCHE DE LA VENTA*/
+         DB::raw("(select @enganche_id:=(abonos.id) from abonos where ventas_id=idVenta and status=1 order by fecha_abono,id asc limit 1) as enganche_id"),
+           /**ENGANCHE $*/
+         DB::raw("(select @enganche:=(cantidad) from abonos where abonos.id=@enganche_id) as enganche"),
+
+         /**TOTAL COBRADO POR LOS COBRADORES SIN TOMAR EN CUENTA EL ENGANCHE */
+         DB::raw("(select @total_cobradores:=(IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=idVenta and fecha_abono<fab and abonos.id<>@enganche_id and abonos.status=1 order by id asc) as total_cobradores"),
+
+         DB::raw("(select @importe:=(ventas.total-@enganche-@total_cobradores)) as importe"),
+
+         /**SALDO */
+         DB::raw("(select @saldo:=if((@importe-cantidad)>0,@importe-cantidad,0)) as saldo"),
+
+         /**SE OBTIENE EL IMPORTE DE LA VENTA HASTA EL RANGO DE FECHAS SELECCIONADAS*/
+         //DB::raw("(select @importe:=(ventas.total-@enganche) from abonos where ventas_id=ventas.id and abonos.fecha_abono<fab and abonos.id<>@enganche_id and abonos.status=1 order by id asc) as importe_pendiente"),
+
+
+         'cantidad',
+         DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta"))
+         ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
             ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
             ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
             ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
             ->join('users', 'rutas.cobrador_id', '=', 'users.id')
             ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
             ->where('abonos.status', '=', 1)
-            ->where('fecha_abono', '>=', $fecha_inicio)
-            ->where('fecha_abono', '<=', $fecha_fin)
+            ->whereBetween('fecha_abono', [$fecha_inicio, $fecha_fin])
             ->where(function ($q) use ($rutas_id) {
                 if ($rutas_id != "") {
                     $q->where('rutas.id', $rutas_id);
                 }
             })
-            ->orderBy('abonos.fecha_abono', 'desc')
+            ->where(function ($q) use ($cobro_id) {
+                if ($cobro_id != "") {
+                    $q->where('abonos.cobrador_id', $cobro_id);
+                }
+            })
+            ->orderBy('abonos.fecha_abono', 'asc')
             ->get();
+
 
 
          //obtengo los datos para el valor total de la ruta
@@ -381,7 +417,7 @@ class VentasController extends ApiController
              // segundo parametro
              Storage::disk('images_base64')->put($img_name, $img);
              $file = storage_path('app/images_base64/' . $img_name);
-             $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa', 'file','total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
+             $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa','cobro_id', 'file','total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
              return $pdf->stream('archivo.pdf');
 
         }
