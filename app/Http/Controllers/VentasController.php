@@ -91,6 +91,9 @@ class VentasController extends ApiController
     public function show($id)
     {
         $venta = Ventas::select(
+            \DB::raw(
+                '(select id from polizas where num_poliza=polizas_id) as id_tabla_polizas'/**ID DE LA POLIZA PARA EXCLUIRLO AL MODIFICAR */
+            ),
             'ventas.id',
             'fecha_registro',
             'fecha_venta',
