@@ -102,6 +102,8 @@ Route::get('ventas/reporte_especifico_pagos', 'VentasController@reporte_especifi
 Route::get('ventas/reporte_cobranza', 'VentasController@reporte_cobranza');
 Route::get('ventas/ruta_completa', 'VentasController@ruta_completa');
 
+Route::get('ventas/reporte_venta', 'VentasController@reporte_venta');
+
 Route::get('excel', 'VentasController@excel');
 
 Route::resource('ventas', 'VentasController',['only'=>['index','show','store','update','destroy']]);
