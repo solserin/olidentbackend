@@ -727,8 +727,75 @@ class VentasController extends ApiController
 
     }
 
-    public function excel()
+    //REPORTES DE VENTAS
+    public function reporte_venta()
     {
+        $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
+        //datos para obtener los resultados
 
+
+        $fecha_inicio = Input::get('fecha_inicio');
+        $fecha_fin = Input::get('fecha_fin');
+        $rutas_id = Input::get('rutas_id');
+        $vendedor_id = Input::get('vendedor_id');
+        //obtengo la lista de informacion
+        $ventas = Ventas::select(
+            'ventas.id as vid',
+            'fecha_venta',
+            'tipo',
+            'polizas.num_poliza',
+            'beneficiarios.nombre',
+            'rutas.id as rid',
+            'ruta',
+            'users.id as vendedor_id',
+            'users.name as vendedor',
+            'precio',
+            'comision_vendedor',
+            DB::raw("(select @enganche:=(cantidad) from abonos where ventas_id=ventas.id order by id asc limit 1) as enganche"),
+            DB::raw("(select @sobre_enganche:=(IFNULL((@enganche-comision_vendedor), 0))) as sobre_enganche"),
+        )
+        ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
+        ->join('tipo_polizas', 'tipo_polizas.id', '=', 'ventas.tipo_polizas_id')
+        ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
+        ->join('users', 'users.id', '=', 'ventas.vendedor_id')
+        ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
+        ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
+        ->whereBetween('fecha_venta', [$fecha_inicio, $fecha_fin])
+        ->where(function ($q) use ($rutas_id) {
+                if ($rutas_id != "") {
+                    $q->where('rutas.id', $rutas_id);
+                }
+            })
+            ->where(function ($q) use ($vendedor_id) {
+                if ($vendedor_id != "") {
+                    $q->where('ventas.vendedor_id', $vendedor_id);
+                }
+            })
+        ->orderBy('fecha_venta', 'asc')
+        ->orderBy('vendedor_id', 'asc')
+        ->orderBy('rid', 'asc')
+        ->get();
+
+
+        //si no lo esta mandando imprimir retorna el json
+        if (!Input::get('imprimir')) {
+            //retorna el json
+            return $ventas;
+        }else{
+            //si se va imprimir
+             $img = getB64Image($empresa[0]->logo);
+             // Obtener la extensión de la Imagen
+             $img_extension = getB64Extension($empresa[0]->logo);
+             // Crear un nombre aleatorio para la imagen
+             $img_name = 'logo' . time() . '.' . $img_extension;
+             // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+             // la función "put" el nombre de la imagen y los datos de la imagen como
+             // segundo parametro
+             Storage::disk('images_base64')->put($img_name, $img);
+             $file = storage_path('app/images_base64/' . $img_name);
+             $pdf = PDF::loadView('reportes/reporte_venta', compact('empresa', 'file', 'ventas', 'fecha_inicio', 'fecha_fin','rutas_id','vendedor_id'))->setPaper('a4', 'landscape');
+             return $pdf->stream('archivo.pdf');
+
+        }
     }
 }
