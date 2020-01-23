@@ -142,7 +142,7 @@ class Polizas extends Model
             //verifico que tipo de venta es (afiliaxion 1 o renoavion 2)
             if($venta->tipos_venta_id==1){
                 //modificamos la fecha de renovacion
-                DB::table('polizas')->where('num_poliza',$request->num_poliza)->update(
+                DB::table('polizas')->where('num_poliza',$request->num_poliza_original)->update(
                     [
                         'fecha_afiliacion' =>$request->fecha_venta,
                     ]
@@ -150,7 +150,7 @@ class Polizas extends Model
             }
             
 
-            DB::table('polizas')->where('num_poliza',$request->num_poliza)->update(
+            DB::table('polizas')->where('num_poliza',$request->num_poliza_original)->update(
                 [
                     'rutas_id' =>$request->ruta_id['id'],
                 ]
@@ -158,7 +158,7 @@ class Polizas extends Model
             
 
             //registrando los beneficiarios (titular)
-            DB::table('beneficiarios')->where('polizas_id',$request->num_poliza)->where('tipo_beneficiarios_id',1)->update(
+            DB::table('beneficiarios')->where('polizas_id',$request->num_poliza_original)->where('tipo_beneficiarios_id',1)->update(
                 [
                     'nombre' =>$request->titular,
                     'colonia' =>$request->colonia,
@@ -176,12 +176,12 @@ class Polizas extends Model
 
             //reviso que la venta ya tenga registrados los beneficiarios y 
             //en caso de no tenerlos los registro
-            $beneficiarios=Beneficiarios::where('polizas_id',$request->num_poliza)->where('tipo_beneficiarios_id',2)->first();
+            $beneficiarios=Beneficiarios::where('polizas_id',$request->num_poliza_original)->where('tipo_beneficiarios_id',2)->first();
             if($beneficiarios){
                 //si existen solamente los actualizo
                 //modificando beneficiarios
                 for ($i=0; $i < $request->tipo_poliza_id['numero_beneficiarios']; $i++) {
-                    DB::table('beneficiarios')->where('num_beneficiario',($i+2))->where('polizas_id',$request->num_poliza)->where('tipo_beneficiarios_id',2)->update(
+                    DB::table('beneficiarios')->where('num_beneficiario',($i+2))->where('polizas_id',$request->num_poliza_original)->where('tipo_beneficiarios_id',2)->update(
                         [
                             'nombre' =>$request->beneficiarios[$i]['nombre'],
                             'edad' =>$request->beneficiarios[$i]['edad'],
@@ -202,7 +202,7 @@ class Polizas extends Model
                             'edad' =>$request->beneficiarios[$i]['edad'],
                             'fotografia' =>$base64,
                             'tipo_beneficiarios_id' =>2,//1 de beneficiario titular
-                            'polizas_id' =>$request->num_poliza,
+                            'polizas_id' =>$request->num_poliza_original,
                             'localidad_id' =>$request->localidad_id,
                         ]
                     );
@@ -216,7 +216,7 @@ class Polizas extends Model
                     'fecha_venta' =>$request->fecha_venta,
                     'fecha_vencimiento' =>Carbon::createFromDate($request->fecha_venta)->addYear($request->tipo_poliza_id['duracion'])->format('Y-m-d H:i:s'),
                     'vendedor_id' =>$request->vendedor_id['id'],
-                    'polizas_id' =>$request->num_poliza,
+                    'polizas_id' =>$request->num_poliza_original,
                     'tipo_polizas_id' =>$request->tipo_poliza_id['id'],
                     'num_beneficiarios' =>$request->tipo_poliza_id['numero_beneficiarios'],
                     'total' =>$request->tipo_poliza_id['precio'],
@@ -224,6 +224,35 @@ class Polizas extends Model
                     //'comision_vendedor' =>($request->tipo_poliza_id['precio']*.10),//10 % de comision
                 ]
             );
+
+
+            /** AQUI AL FINAL VERIFICO SI CAMBIO EL NUMERO DE POLIZA ORIGINAL Y CAMBIO LA POLIZA, VENTAS Y ABONOS
+             * ASOCIADOA AL ANTIGUO NUM DE POLIZA  AL NUEVO NUM DE POLIZA
+            */
+            if($request->num_poliza!=$request->num_poliza_original){
+                //quiere decir que la poliza cambio de numero y debe actualizarce todos los campos
+                //relacionados al antiguro numero
+
+                DB::table('polizas')->where('num_poliza',$request->num_poliza_original)->update(
+                    [
+                        'num_poliza' =>$request->num_poliza
+                    ]
+                );
+
+                DB::table('beneficiarios')->where('polizas_id',$request->num_poliza_original)->update(
+                    [
+                        'polizas_id' =>$request->num_poliza
+                    ]
+                );
+
+                DB::table('ventas')->where('polizas_id',$request->num_poliza_original)->update(
+                    [
+                        'polizas_id' =>$request->num_poliza
+                    ]
+                );
+            }
+
+
 
             DB::commit();
             return $id;

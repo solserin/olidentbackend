@@ -201,7 +201,10 @@ class PolizasController extends ApiController
     request()->validate(
       [
         'usuario_registro_id' => 'required|integer',
-        'num_poliza' => 'required|integer',
+        /**este es el numero de poliza (mismo o nuevo) al final tomo en cuenta num_poliza_original para hacer los cambios
+         * y despues actualizo si aplica
+         */
+        'num_poliza' => 'required|integer|unique:polizas,num_poliza,'.$request->id_poliza,
         'fecha_venta' => 'required|date_format:Y-m-d',
         'tipo_poliza_id' => 'required',
         'ruta_id' => 'required',
@@ -222,6 +225,7 @@ class PolizasController extends ApiController
         'integer' => 'Este dato debe ser un numero entero.',
         'numeric' => 'Este dato debe ser un numero.',
         'email' => 'Debe ingresar un email',
+        'unique' => 'Este número de póliza no está disponible',
       ]
     );
 
