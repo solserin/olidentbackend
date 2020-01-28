@@ -752,7 +752,7 @@ class VentasController extends ApiController
             'precio',
             'comision_vendedor',
             DB::raw("(select @enganche:=(cantidad) from abonos where ventas_id=ventas.id order by id asc limit 1) as enganche"),
-            DB::raw("(select @sobre_enganche:=(IFNULL((@enganche-comision_vendedor), 0))) as sobre_enganche"),
+            DB::raw("(select @sobre_enganche:=(IFNULL((@enganche-comision_vendedor), 0))) as sobre_enganche")
         )
         ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
         ->join('tipo_polizas', 'tipo_polizas.id', '=', 'ventas.tipo_polizas_id')
