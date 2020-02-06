@@ -13,9 +13,11 @@
 
 
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Redirect;
 
 Route::get('/', function () {
-    return view('welcome');
+    return Redirect::to('https://sistema.olident.com.mx/');
+    //return view('welcome');
 })->middleware('guest');
 
  // Authentication Routes...
@@ -30,5 +32,8 @@ Route::get('/', function () {
 
  
 
+
+Route::get('/home', 'HomeController@index')->name('home');
+Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
