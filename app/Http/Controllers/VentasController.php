@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Abonos;
 use App\Ventas;
 use App\Polizas;
@@ -92,7 +93,8 @@ class VentasController extends ApiController
     {
         $venta = Ventas::select(
             \DB::raw(
-                '(select id from polizas where num_poliza=polizas_id) as id_tabla_polizas'/**ID DE LA POLIZA PARA EXCLUIRLO AL MODIFICAR */
+                '(select id from polizas where num_poliza=polizas_id) as id_tabla_polizas'
+                /**ID DE LA POLIZA PARA EXCLUIRLO AL MODIFICAR */
             ),
             'ventas.id',
             'fecha_registro',
@@ -327,37 +329,46 @@ class VentasController extends ApiController
         //return $tipo_ventas_id;
         //obtengo la lista de informacion
         $pagos = Abonos::select(
-        'name','ventas_id as idVenta', 'fecha_abono', 'ventas.polizas_id',
-         'beneficiarios.nombre', 'ventas.total', 'ruta', 'abonos.id as aid',
-         'fecha_abono as fab',
-         'abonos.id as id_abo',
-         'comision_vendedor',
-        'total as total_venta','abonado','restante',
+            'name',
+            'ventas_id as idVenta',
+            'fecha_abono',
+            'ventas.polizas_id',
+            'beneficiarios.nombre',
+            'ventas.total',
+            'ruta',
+            'abonos.id as aid',
+            'fecha_abono as fab',
+            'abonos.id as id_abo',
+            'comision_vendedor',
+            'total as total_venta',
+            'abonado',
+            'restante',
 
 
-             /**NOMBRE DEL COBRADOR*/
-         DB::raw("(select @cobrador:=(name) from users where id=abonos.cobrador_id) as cobrador"),
+            /**NOMBRE DEL COBRADOR*/
+            DB::raw("(select @cobrador:=(name) from users where id=abonos.cobrador_id) as cobrador"),
 
-             /**ESTE ES EL ID DEL ENGANCHE DE LA VENTA*/
-         DB::raw("(select @enganche_id:=(abonos.id) from abonos where ventas_id=idVenta and status=1 order by fecha_abono,id asc limit 1) as enganche_id"),
-           /**ENGANCHE $*/
-         DB::raw("(select @enganche:=(cantidad) from abonos where abonos.id=@enganche_id) as enganche"),
+            /**ESTE ES EL ID DEL ENGANCHE DE LA VENTA*/
+            DB::raw("(select @enganche_id:=(abonos.id) from abonos where ventas_id=idVenta and status=1 order by fecha_abono,id asc limit 1) as enganche_id"),
+            /**ENGANCHE $*/
+            DB::raw("(select @enganche:=(cantidad) from abonos where abonos.id=@enganche_id) as enganche"),
 
-         /**TOTAL COBRADO POR LOS COBRADORES SIN TOMAR EN CUENTA EL ENGANCHE */
-         DB::raw("(select @total_cobradores:=(IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=idVenta and fecha_abono<fab and abonos.id<>@enganche_id and abonos.status=1 order by id asc) as total_cobradores"),
+            /**TOTAL COBRADO POR LOS COBRADORES SIN TOMAR EN CUENTA EL ENGANCHE */
+            DB::raw("(select @total_cobradores:=(IFNULL(SUM(cantidad), 0)) from abonos where ventas_id=idVenta and fecha_abono<fab and abonos.id<>@enganche_id and abonos.status=1 order by id asc) as total_cobradores"),
 
-         DB::raw("(select @importe:=(ventas.total-@enganche-@total_cobradores)) as importe"),
+            DB::raw("(select @importe:=(ventas.total-@enganche-@total_cobradores)) as importe"),
 
-         /**SALDO */
-         DB::raw("(select @saldo:=if((@importe-cantidad)>0,@importe-cantidad,0)) as saldo"),
+            /**SALDO */
+            DB::raw("(select @saldo:=if((@importe-cantidad)>0,@importe-cantidad,0)) as saldo"),
 
-         /**SE OBTIENE EL IMPORTE DE LA VENTA HASTA EL RANGO DE FECHAS SELECCIONADAS*/
-         //DB::raw("(select @importe:=(ventas.total-@enganche) from abonos where ventas_id=ventas.id and abonos.fecha_abono<fab and abonos.id<>@enganche_id and abonos.status=1 order by id asc) as importe_pendiente"),
+            /**SE OBTIENE EL IMPORTE DE LA VENTA HASTA EL RANGO DE FECHAS SELECCIONADAS*/
+            //DB::raw("(select @importe:=(ventas.total-@enganche) from abonos where ventas_id=ventas.id and abonos.fecha_abono<fab and abonos.id<>@enganche_id and abonos.status=1 order by id asc) as importe_pendiente"),
 
 
-         'cantidad',
-         DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta"))
-         ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
+            'cantidad',
+            DB::raw("(select @total_ruta:=(sum(ventas.restante)) from ventas where ventas.status=1) as total_ruta")
+        )
+            ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
             ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
             ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
             ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
@@ -380,27 +391,26 @@ class VentasController extends ApiController
 
 
 
-         //obtengo los datos para el valor total de la ruta
-         $polizas=Polizas::
-        select('polizas.id','num_poliza','rutas_id','ruta')
-        ->with(
-            array('ventas' => function ($query) {
-                $query->select('ventas.polizas_id','ventas.id','nombre','total','abonado','restante','fecha_venta','fecha_vencimiento')
-                ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
-                ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
-                ->orderBy('ventas.id', 'desc');
-            })
-        )
-        ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
-        ->where('rutas_id', '=',  $rutas_id)
-        ->orderBy('num_poliza', 'desc')
-        ->get();
+        //obtengo los datos para el valor total de la ruta
+        $polizas = Polizas::select('polizas.id', 'num_poliza', 'rutas_id', 'ruta')
+            ->with(
+                array('ventas' => function ($query) {
+                    $query->select('ventas.polizas_id', 'ventas.id', 'nombre', 'total', 'abonado', 'restante', 'fecha_venta', 'fecha_vencimiento')
+                        ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
+                        ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
+                        ->orderBy('ventas.id', 'desc');
+                })
+            )
+            ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
+            ->where('rutas_id', '=',  $rutas_id)
+            ->orderBy('num_poliza', 'desc')
+            ->get();
 
-        $total_ruta=0;
+        $total_ruta = 0;
         foreach ($polizas as $poliza) {
-            $total_ruta=$total_ruta+$poliza->ventas[0]->restante;
+            $total_ruta = $total_ruta + $poliza->ventas[0]->restante;
         }
-         //fin de calculo para la ruta
+        //fin de calculo para la ruta
 
 
 
@@ -408,21 +418,20 @@ class VentasController extends ApiController
         if (!Input::get('imprimir')) {
             //retorna el json
             return $pagos;
-        }else{
+        } else {
             //si se va imprimir
-             $img = getB64Image($empresa[0]->logo);
-             // Obtener la extensión de la Imagen
-             $img_extension = getB64Extension($empresa[0]->logo);
-             // Crear un nombre aleatorio para la imagen
-             $img_name = 'logo' . time() . '.' . $img_extension;
-             // Usando el Storage guardar en el disco creado anteriormente y pasandole a
-             // la función "put" el nombre de la imagen y los datos de la imagen como
-             // segundo parametro
-             Storage::disk('images_base64')->put($img_name, $img);
-             $file = storage_path('app/images_base64/' . $img_name);
-             $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa','cobro_id', 'file','total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
-             return $pdf->stream('archivo.pdf');
-
+            $img = getB64Image($empresa[0]->logo);
+            // Obtener la extensión de la Imagen
+            $img_extension = getB64Extension($empresa[0]->logo);
+            // Crear un nombre aleatorio para la imagen
+            $img_name = 'logo' . time() . '.' . $img_extension;
+            // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+            // la función "put" el nombre de la imagen y los datos de la imagen como
+            // segundo parametro
+            Storage::disk('images_base64')->put($img_name, $img);
+            $file = storage_path('app/images_base64/' . $img_name);
+            $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa', 'cobro_id', 'file', 'total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
+            return $pdf->stream('archivo.pdf');
         }
     }
 
@@ -432,299 +441,300 @@ class VentasController extends ApiController
         $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
         //datos para obtener los resultados
         $rutas_id = Input::get('rutas_id');
-        $polizas=Polizas::
-        select('polizas.id','num_poliza','rutas_id','ruta','name')
-        ->with(
-            array('ventas' => function ($query) {
-                $query->select('ventas.polizas_id','ventas.id','nombre','total','abonado','restante','fecha_venta','fecha_vencimiento','ventas.status')
-                ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
-                ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
-                ->orderBy('ventas.id', 'desc');
-            })
-        )
-        ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
-        ->join('users', 'rutas.cobrador_id', '=', 'users.id')
-        ->where('rutas_id', '=',  $rutas_id)
-        //->where('polizas.num_poliza', '=', 874)
-        ->orderBy('num_poliza', 'desc')
-        ->get();
+        $polizas = Polizas::select('polizas.id', 'num_poliza', 'rutas_id', 'ruta', 'name')
+            ->with(
+                array('ventas' => function ($query) {
+                    $query->select('ventas.polizas_id', 'ventas.id', 'nombre', 'total', 'abonado', 'restante', 'fecha_venta', 'fecha_vencimiento', 'ventas.status')
+                        ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
+                        ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
+                        ->orderBy('ventas.id', 'desc');
+                })
+            )
+            ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
+            ->join('users', 'rutas.cobrador_id', '=', 'users.id')
+            ->where('rutas_id', '=',  $rutas_id)
+            //->where('polizas.num_poliza', '=', 874)
+            ->orderBy('num_poliza', 'desc')
+            ->get();
         //si no lo esta mandando imprimir retorna el json
         if (!Input::get('imprimir')) {
             //retorna el json
             return $this->showAllPaginated($polizas);
-        }else{
+        } else {
             //calculo el valor de la ruta
-            $total_ruta=0;
-            $recuperado=0;
-            $venta_ruta=0;
+            $total_ruta = 0;
+            $recuperado = 0;
+            $venta_ruta = 0;
             foreach ($polizas as $poliza) {
-                $total_ruta=$total_ruta+$poliza->ventas[0]->restante;
-                $recuperado=$recuperado+$poliza->ventas[0]->abonado;
-                $venta_ruta=$venta_ruta+$poliza->ventas[0]->total;
+                $total_ruta = $total_ruta + $poliza->ventas[0]->restante;
+                $recuperado = $recuperado + $poliza->ventas[0]->abonado;
+                $venta_ruta = $venta_ruta + $poliza->ventas[0]->total;
             }
-        //fin de calculo para la ruta
-         $nombre_reporte="Ruta ";
-        if(count($polizas)>0){
-            $nombre_reporte.=$polizas[0]->ruta;
-        }
+            //fin de calculo para la ruta
+            $nombre_reporte = "Ruta ";
+            if (count($polizas) > 0) {
+                $nombre_reporte .= $polizas[0]->ruta;
+            }
 
 
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->getProperties()
-        ->setCreator('CLÍNICA OLI-DENT S.R.L de C.V')
-        ->setTitle("Reporte de ruta completa")
-        ->setSubject("Reporte de ruta completa")
-        ->setDescription("Lista de polizas de la ruta")
-        ->setCategory("Reportes de aseguradora");
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->getProperties()
+                ->setCreator('CLÍNICA OLI-DENT S.R.L de C.V')
+                ->setTitle("Reporte de ruta completa")
+                ->setSubject("Reporte de ruta completa")
+                ->setDescription("Lista de polizas de la ruta")
+                ->setCategory("Reportes de aseguradora");
 
-        $spreadsheet->setActiveSheetIndex(0);
-        // Renombrar Hoja
-        $spreadsheet->getActiveSheet()->setTitle($nombre_reporte);
-        $sheet = $spreadsheet->getActiveSheet();
+            $spreadsheet->setActiveSheetIndex(0);
+            // Renombrar Hoja
+            $spreadsheet->getActiveSheet()->setTitle($nombre_reporte);
+            $sheet = $spreadsheet->getActiveSheet();
 
-        //header del reporte
-        $estilo_header = [
-            'font' => [
-                'bold' => true,
-                'color' => [
-                    'argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE
+            //header del reporte
+            $estilo_header = [
+                'font' => [
+                    'bold' => true,
+                    'color' => [
+                        'argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE
+                    ]
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                ],
+                'borders' => [
+                    'top' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'FFFFFFFF']
+                    ],
+                    'bottom' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'FFFFFFFF']
+                    ],
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => [
+                        'argb' => '1675ab',
+                    ],
                 ]
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ],
-            'borders' => [
-                'top' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => [ 'rgb' => 'FFFFFFFF' ]
-                ],
-                'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => [ 'rgb' => 'FFFFFFFF' ]
-                ],
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => [
-                    'argb' => '1675ab',
-                ],
-            ]
-        ];
+            ];
 
-        $estilo_cancelados = [
-            'font' => [
-                'bold' => true,
-                'color' => [
-                    'argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED
+            $estilo_cancelados = [
+                'font' => [
+                    'bold' => true,
+                    'color' => [
+                        'argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED
+                    ]
                 ]
-            ]
-        ];
+            ];
 
 
-        $spreadsheet->getActiveSheet()->getStyle('A1'.':F3')->applyFromArray($estilo_header);
-        $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
-        $sheet->setCellValue('A1', 'CLÍNICA OLI-DENT S.R.L de C.V.');
-        $spreadsheet->getActiveSheet()->mergeCells('A2:F2');
-        $sheet->setCellValue('A2', strtoupper($polizas[0]->name.'-'.$polizas[0]->ruta));
-        $spreadsheet->getActiveSheet()->mergeCells('A3:F3');
-        $sheet->setCellValue('A3', strtoupper('Actualizado para el día '.fechahora_completa()));
-        //fin header datos de la empresa
+            $spreadsheet->getActiveSheet()->getStyle('A1' . ':F3')->applyFromArray($estilo_header);
+            $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
+            $sheet->setCellValue('A1', 'CLÍNICA OLI-DENT S.R.L de C.V.');
+            $spreadsheet->getActiveSheet()->mergeCells('A2:F2');
+            $sheet->setCellValue('A2', strtoupper($polizas[0]->name . '-' . $polizas[0]->ruta));
+            $spreadsheet->getActiveSheet()->mergeCells('A3:F3');
+            $sheet->setCellValue('A3', strtoupper('Actualizado para el día ' . fechahora_completa()));
+            //fin header datos de la empresa
 
-        $inicio_headers=9;
-        $header_inicio=$inicio_headers+1;
+            $inicio_headers = 9;
+            $header_inicio = $inicio_headers + 1;
 
 
-        $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($estilo_header);
+            $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($estilo_header);
 
-        $sheet->setCellValue('A'.$inicio_headers, 'Póliza');
-        $sheet->setCellValue('B'.$inicio_headers, 'Fecha Venta');
-        $sheet->setCellValue('C'.$inicio_headers, 'Titular');
-        $sheet->setCellValue('D'.$inicio_headers, 'Importe');
-        $sheet->setCellValue('E'.$inicio_headers, 'Pagado');
-        $sheet->setCellValue('F'.$inicio_headers, 'Saldo');
+            $sheet->setCellValue('A' . $inicio_headers, 'Póliza');
+            $sheet->setCellValue('B' . $inicio_headers, 'Fecha Venta');
+            $sheet->setCellValue('C' . $inicio_headers, 'Titular');
+            $sheet->setCellValue('D' . $inicio_headers, 'Importe');
+            $sheet->setCellValue('E' . $inicio_headers, 'Pagado');
+            $sheet->setCellValue('F' . $inicio_headers, 'Saldo');
 
-        //escribiendo los datos
-        $estilo_stripping = [
-            'borders' => [
-                'top' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => [ 'rgb' => 'FFFFFFFF' ]
+            //escribiendo los datos
+            $estilo_stripping = [
+                'borders' => [
+                    'top' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'FFFFFFFF']
+                    ],
+                    'bottom' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'FFFFFFFF']
+                    ],
                 ],
-                'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => [ 'rgb' => 'FFFFFFFF' ]
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => [
+                        'argb' => 'd2e4ee',
+                    ],
+                ]
+            ];
+            $alineacion = [
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ],
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => [
-                    'argb' => 'd2e4ee',
-                ],
-            ]
-        ];
-        $alineacion = [
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ],
-        ];
-        $inicio_headers+=1;
-        $cancelado_total=0;
-        $restante=0;
-        foreach ($polizas as $poliza) {
+            ];
+            $inicio_headers += 1;
+            $cancelado_total = 0;
+            $restante = 0;
+            foreach ($polizas as $poliza) {
 
-            $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($alineacion);
-            $sheet->setCellValue('A'.$inicio_headers, $poliza->num_poliza);
-            $sheet->setCellValue('B'.$inicio_headers, $poliza->ventas[0]->fecha_venta);
-            $sheet->setCellValue('C'.$inicio_headers, $poliza->ventas[0]->nombre);
-            $sheet->setCellValue('D'.$inicio_headers, $poliza->ventas[0]->total);
-            $spreadsheet->getActiveSheet()->getStyle('D'.$inicio_headers.':F'.$inicio_headers)->applyFromArray(
+                $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($alineacion);
+                $sheet->setCellValue('A' . $inicio_headers, $poliza->num_poliza);
+                $sheet->setCellValue('B' . $inicio_headers, $poliza->ventas[0]->fecha_venta);
+                $sheet->setCellValue('C' . $inicio_headers, $poliza->ventas[0]->nombre);
+                $sheet->setCellValue('D' . $inicio_headers, $poliza->ventas[0]->total);
+                $spreadsheet->getActiveSheet()->getStyle('D' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                    [
+                        'numberFormat' => [
+                            'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                        ],
+                    ]
+                );
+                if ($poliza->ventas[0]->status == 0) {
+                    /**calculo total cancelado y total restante */
+                    $cancelado_total += $poliza->ventas[0]->total;
+                    $restante = $poliza->ventas[0]->restante;
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                        $estilo_cancelados
+                    );
+                }
+
+                $sheet->setCellValue('E' . $inicio_headers, $poliza->ventas[0]->abonado);
+                $sheet->setCellValue('F' . $inicio_headers, $poliza->ventas[0]->restante);
+                $inicio_headers += 1;
+
+                if (($inicio_headers % 2) == 1) {
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($estilo_stripping);
+                }
+            }
+
+
+            //totales y resumen en el header y footer
+            $spreadsheet->getActiveSheet()->getStyle('D' . ($inicio_headers + 1) . ':F' . ($inicio_headers + 1))->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('D' . ($inicio_headers + 2) . ':F' . ($inicio_headers + 2))->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('D' . ($inicio_headers + 3) . ':F' . ($inicio_headers + 3))->applyFromArray($estilo_stripping);
+
+            $spreadsheet->getActiveSheet()->mergeCells('D' . ($inicio_headers + 1) . ':E' . ($inicio_headers + 1));
+            $spreadsheet->getActiveSheet()->mergeCells('D' . ($inicio_headers + 2) . ':E' . ($inicio_headers + 2));
+            $spreadsheet->getActiveSheet()->mergeCells('D' . ($inicio_headers + 3) . ':E' . ($inicio_headers + 3));
+
+            $sheet->setCellValue('D' . ($inicio_headers + 1), strtoupper('VALOR DE LA RUTA: '));
+            $spreadsheet->getActiveSheet()->getStyle('F' . ($inicio_headers + 1))->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
                     ],
                 ]
             );
-            if($poliza->ventas[0]->status==0){
-                /**calculo total cancelado y total restante */
-                $cancelado_total+=$poliza->ventas[0]->total;
-                $restante=$poliza->ventas[0]->restante;
-                $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray(
-                   $estilo_cancelados
-                );
+            $sheet->setCellValue('F' . ($inicio_headers + 1), '=SUM(D' . $header_inicio . ':D' . ($inicio_headers - 1) . ')-' . ($cancelado_total));
+            $sheet->setCellValue('D' . ($inicio_headers + 2), strtoupper('COBRADO: '));
+            $sheet->setCellValue('F' . ($inicio_headers + 2), '=SUM(E' . $header_inicio . ':E' . ($inicio_headers - 1) . ')');
+            $spreadsheet->getActiveSheet()->getStyle('F' . ($inicio_headers + 2))->applyFromArray(
+                [
+                    'numberFormat' => [
+                        'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                    ],
+                ]
+            );
+            $sheet->setCellValue('D' . ($inicio_headers + 3), strtoupper('RESTANTE: '));
+            $sheet->setCellValue('F' . ($inicio_headers + 3), '=SUM(F' . $header_inicio . ':F' . ($inicio_headers - 1) . ')-' . ($restante));
+            $spreadsheet->getActiveSheet()->getStyle('F' . ($inicio_headers + 3))->applyFromArray(
+                [
+                    'numberFormat' => [
+                        'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                    ],
+                ]
+            );
+            //fin en el footer
+            //incio del header
+            $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray(
+                [
+                    'numberFormat' => [
+                        'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                    ],
+                ]
+            );
+            $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray(
+                [
+                    'numberFormat' => [
+                        'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                    ],
+                ]
+            );
+            $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray(
+                [
+                    'numberFormat' => [
+                        'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
+                    ],
+                ]
+            );
+            $spreadsheet->getActiveSheet()->mergeCells('D5:E5');
+            $sheet->setCellValue('D5', strtoupper('VALOR DE LA RUTA: '));
+            $sheet->setCellValue('F5', '=F' . ($inicio_headers + 1));
+            $spreadsheet->getActiveSheet()->mergeCells('D6:E6');
+            $sheet->setCellValue('F6', '=F' . ($inicio_headers + 2));
+            $sheet->setCellValue('D6', strtoupper('COBRADO: '));
+            $spreadsheet->getActiveSheet()->mergeCells('D7:E7');
+            $sheet->setCellValue('F7', '=F' . ($inicio_headers + 3));
+            $sheet->setCellValue('D7', strtoupper('RESTANTE: '));
+            //fin de totales y resumen
+
+
+
+            //sacando los totales
+
+
+
+
+            $spreadsheet->getActiveSheet()->getColumnDimension("A")
+                ->setAutoSize(true);
+            $spreadsheet->getActiveSheet()->getColumnDimension("B")
+                ->setAutoSize(true);
+            $spreadsheet->getActiveSheet()->getColumnDimension("C")
+                ->setAutoSize(true);
+            $spreadsheet->getActiveSheet()->getColumnDimension("D")
+                ->setAutoSize(true);
+            $spreadsheet->getActiveSheet()->getColumnDimension("F")
+                ->setAutoSize(true);
+            $spreadsheet->getActiveSheet()->getColumnDimension("G")
+                ->setAutoSize(true);
+
+            $nombre_reporte = "Ruta ";
+            if (count($polizas) > 0) {
+                $nombre_reporte .= $polizas[0]->ruta;
             }
-
-            $sheet->setCellValue('E'.$inicio_headers, $poliza->ventas[0]->abonado);
-            $sheet->setCellValue('F'.$inicio_headers, $poliza->ventas[0]->restante);
-            $inicio_headers+=1;
-
-            if(($inicio_headers%2)==1){
-                $spreadsheet->getActiveSheet()->getStyle('A'.$inicio_headers.':F'.$inicio_headers)->applyFromArray($estilo_stripping);
-            }
-        }
+            $nombre_reporte .= " " . fechahora_completa();
 
 
-        //totales y resumen en el header y footer
-        $spreadsheet->getActiveSheet()->getStyle('D'.($inicio_headers+1).':F'.($inicio_headers+1))->applyFromArray($estilo_stripping);
-        $spreadsheet->getActiveSheet()->getStyle('D'.($inicio_headers+2).':F'.($inicio_headers+2))->applyFromArray($estilo_stripping);
-        $spreadsheet->getActiveSheet()->getStyle('D'.($inicio_headers+3).':F'.($inicio_headers+3))->applyFromArray($estilo_stripping);
-
-        $spreadsheet->getActiveSheet()->mergeCells('D'.($inicio_headers+1).':E'.($inicio_headers+1));
-        $spreadsheet->getActiveSheet()->mergeCells('D'.($inicio_headers+2).':E'.($inicio_headers+2));
-        $spreadsheet->getActiveSheet()->mergeCells('D'.($inicio_headers+3).':E'.($inicio_headers+3));
-
-        $sheet->setCellValue('D'.($inicio_headers+1), strtoupper('VALOR DE LA RUTA: '));
-        $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+1))->applyFromArray(
-            [
-                'numberFormat' => [
-                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
-                ],
-            ]
-        );
-        $sheet->setCellValue('F'.($inicio_headers+1),'=SUM(D'.$header_inicio.':D'.($inicio_headers-1).')-'.($cancelado_total));
-        $sheet->setCellValue('D'.($inicio_headers+2), strtoupper('COBRADO: '));
-        $sheet->setCellValue('F'.($inicio_headers+2),'=SUM(E'.$header_inicio.':E'.($inicio_headers-1).')');
-        $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+2))->applyFromArray(
-            [
-                'numberFormat' => [
-                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
-                ],
-            ]
-        );
-        $sheet->setCellValue('D'.($inicio_headers+3), strtoupper('RESTANTE: '));
-        $sheet->setCellValue('F'.($inicio_headers+3),'=SUM(F'.$header_inicio.':F'.($inicio_headers-1).')-'.($restante));
-        $spreadsheet->getActiveSheet()->getStyle('F'.($inicio_headers+3))->applyFromArray(
-            [
-                'numberFormat' => [
-                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
-                ],
-            ]
-        );
-        //fin en el footer
-        //incio del header
-        $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray($estilo_stripping);
-        $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray(
-            [
-                'numberFormat' => [
-                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
-                ],
-            ]
-        );
-        $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray($estilo_stripping);
-        $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray(
-            [
-                'numberFormat' => [
-                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
-                ],
-            ]
-        );
-        $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray($estilo_stripping);
-        $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray(
-            [
-                'numberFormat' => [
-                    'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
-                ],
-            ]
-        );
-        $spreadsheet->getActiveSheet()->mergeCells('D5:E5');
-        $sheet->setCellValue('D5', strtoupper('VALOR DE LA RUTA: ')); $sheet->setCellValue('F5', '=F'.($inicio_headers+1));
-        $spreadsheet->getActiveSheet()->mergeCells('D6:E6');$sheet->setCellValue('F6', '=F'.($inicio_headers+2));
-        $sheet->setCellValue('D6', strtoupper('COBRADO: '));
-        $spreadsheet->getActiveSheet()->mergeCells('D7:E7');$sheet->setCellValue('F7', '=F'.($inicio_headers+3));
-        $sheet->setCellValue('D7', strtoupper('RESTANTE: '));
-        //fin de totales y resumen
-
-
-
-        //sacando los totales
-
-
-
-
-        $spreadsheet->getActiveSheet()->getColumnDimension("A")
-        ->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension("B")
-        ->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension("C")
-        ->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension("D")
-        ->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension("F")
-        ->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension("G")
-        ->setAutoSize(true);
-
-        $nombre_reporte="Ruta ";
-        if(count($polizas)>0){
-            $nombre_reporte.=$polizas[0]->ruta;
-        }
-            $nombre_reporte.=" ".fechahora_completa();
-
-
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save('export.xlsx');
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="'.$nombre_reporte.'.xlsx"');
-        $writer->save("php://output");
-        exit;
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('export.xlsx');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="' . $nombre_reporte . '.xlsx"');
+            $writer->save("php://output");
+            exit;
 
 
 
             //si se va imprimir
-             //$img = getB64Image($empresa[0]->logo);
-             // Obtener la extensión de la Imagen
-             //$img_extension = getB64Extension($empresa[0]->logo);
-             // Crear un nombre aleatorio para la imagen
-             //$img_name = 'logo' . time() . '.' . $img_extension;
-             // Usando el Storage guardar en el disco creado anteriormente y pasandole a
-             // la función "put" el nombre de la imagen y los datos de la imagen como
-             // segundo parametro
-             //Storage::disk('images_base64')->put($img_name, $img);
-             //$file = storage_path('app/images_base64/' . $img_name);
-             //$pdf = PDF::loadView('reportes/ruta_completa', compact('empresa', 'file','total_ruta', 'polizas','recuperado','venta_ruta'))->setPaper('a4', 'portrait');
-             //return $pdf->stream('archivo.pdf');
+            //$img = getB64Image($empresa[0]->logo);
+            // Obtener la extensión de la Imagen
+            //$img_extension = getB64Extension($empresa[0]->logo);
+            // Crear un nombre aleatorio para la imagen
+            //$img_name = 'logo' . time() . '.' . $img_extension;
+            // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+            // la función "put" el nombre de la imagen y los datos de la imagen como
+            // segundo parametro
+            //Storage::disk('images_base64')->put($img_name, $img);
+            //$file = storage_path('app/images_base64/' . $img_name);
+            //$pdf = PDF::loadView('reportes/ruta_completa', compact('empresa', 'file','total_ruta', 'polizas','recuperado','venta_ruta'))->setPaper('a4', 'portrait');
+            //return $pdf->stream('archivo.pdf');
 
         }
-
     }
 
     //REPORTES DE VENTAS
@@ -754,14 +764,14 @@ class VentasController extends ApiController
             DB::raw("(select @enganche:=(cantidad) from abonos where ventas_id=ventas.id order by id asc limit 1) as enganche"),
             DB::raw("(select @sobre_enganche:=(IFNULL((@enganche-comision_vendedor), 0))) as sobre_enganche")
         )
-        ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
-        ->join('tipo_polizas', 'tipo_polizas.id', '=', 'ventas.tipo_polizas_id')
-        ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
-        ->join('users', 'users.id', '=', 'ventas.vendedor_id')
-        ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
-        ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
-        ->whereBetween('fecha_venta', [$fecha_inicio, $fecha_fin])
-        ->where(function ($q) use ($rutas_id) {
+            ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
+            ->join('tipo_polizas', 'tipo_polizas.id', '=', 'ventas.tipo_polizas_id')
+            ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
+            ->join('users', 'users.id', '=', 'ventas.vendedor_id')
+            ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
+            ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
+            ->whereBetween('fecha_venta', [$fecha_inicio, $fecha_fin])
+            ->where(function ($q) use ($rutas_id) {
                 if ($rutas_id != "") {
                     $q->where('rutas.id', $rutas_id);
                 }
@@ -771,31 +781,37 @@ class VentasController extends ApiController
                     $q->where('ventas.vendedor_id', $vendedor_id);
                 }
             })
-        ->orderBy('fecha_venta', 'asc')
-        ->orderBy('vendedor_id', 'asc')
-        ->orderBy('rid', 'asc')
-        ->get();
+            ->orderBy('fecha_venta', 'asc')
+            ->orderBy('vendedor_id', 'asc')
+            ->orderBy('rid', 'asc')
+            ->get();
 
 
         //si no lo esta mandando imprimir retorna el json
         if (!Input::get('imprimir')) {
             //retorna el json
             return $ventas;
-        }else{
+        } else {
             //si se va imprimir
-             $img = getB64Image($empresa[0]->logo);
-             // Obtener la extensión de la Imagen
-             $img_extension = getB64Extension($empresa[0]->logo);
-             // Crear un nombre aleatorio para la imagen
-             $img_name = 'logo' . time() . '.' . $img_extension;
-             // Usando el Storage guardar en el disco creado anteriormente y pasandole a
-             // la función "put" el nombre de la imagen y los datos de la imagen como
-             // segundo parametro
-             Storage::disk('images_base64')->put($img_name, $img);
-             $file = storage_path('app/images_base64/' . $img_name);
-             $pdf = PDF::loadView('reportes/reporte_venta', compact('empresa', 'file', 'ventas', 'fecha_inicio', 'fecha_fin','rutas_id','vendedor_id'))->setPaper('a4', 'landscape');
-             return $pdf->stream('archivo.pdf');
+            $img = getB64Image($empresa[0]->logo);
+            // Obtener la extensión de la Imagen
+            $img_extension = getB64Extension($empresa[0]->logo);
+            // Crear un nombre aleatorio para la imagen
+            $img_name = 'logo' . time() . '.' . $img_extension;
+            // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+            // la función "put" el nombre de la imagen y los datos de la imagen como
+            // segundo parametro
+            Storage::disk('images_base64')->put($img_name, $img);
+            $file = storage_path('app/images_base64/' . $img_name);
 
+            //verifico si el reporte es completo o resumen
+            if (!Input::get('resumen')) {
+                $pdf = PDF::loadView('reportes/reporte_venta', compact('empresa', 'file', 'ventas', 'fecha_inicio', 'fecha_fin', 'rutas_id', 'vendedor_id'))->setPaper('a4', 'landscape');
+            } else {
+                $pdf = PDF::loadView('reportes/reporte_venta_resumen', compact('empresa', 'file', 'ventas', 'fecha_inicio', 'fecha_fin', 'rutas_id', 'vendedor_id'))->setPaper('a4', 'portrait');
+            }
+
+            return $pdf->stream('archivo.pdf');
         }
     }
 }
