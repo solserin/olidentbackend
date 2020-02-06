@@ -781,9 +781,10 @@ class VentasController extends ApiController
                     $q->where('ventas.vendedor_id', $vendedor_id);
                 }
             })
-            ->orderBy('fecha_venta', 'asc')
-            ->orderBy('vendedor_id', 'asc')
-            ->orderBy('rid', 'asc')
+            //->orderBy('fecha_venta', 'asc')
+            //->orderBy('vendedor_id', 'asc')
+            //->orderBy('rid', 'asc')
+            ->orderBy('polizas.num_poliza', 'asc')
             ->get();
 
 
