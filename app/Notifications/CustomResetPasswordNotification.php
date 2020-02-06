@@ -43,6 +43,8 @@ class CustomResetPasswordNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
+                    ->from('olident.sistema@gmail.com','SISTEMA OLIDENT')
+                    ->greeting('Servicios OLIDENT')
                     ->subject("SISTEMA OLIDENT | Recuperación de contraseña")
                     ->line("Olvidó su contraseña? De click en el botón para actualizarla.")
                     ->action('Recuperar Contraseña', url('password/reset', $this->token))

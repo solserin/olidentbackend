@@ -65,6 +65,7 @@
        
     </tr>
   </table>
+
   <img style="margin-left: 10px !important; width:1000px; margin-top:40px !important;" src='{{$grafica}}'/>
   <footer>
         Actualizado para el día {{fechahora_completa()}}.

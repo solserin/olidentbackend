@@ -478,6 +478,7 @@ class PolizasController extends ApiController
     Storage::disk('images_base64')->put($img_name, $img);
     $file = storage_path('app/images_base64/' . $img_name);
 
+    
     //creo la imagen de la grafica
     //eliminos los archivos anteriores
     $files = Storage::disk('reporte_graficas')->files();
