@@ -386,7 +386,8 @@ class VentasController extends ApiController
                     $q->where('abonos.cobrador_id', $cobro_id);
                 }
             })
-            ->orderBy('abonos.fecha_abono', 'asc')
+            ->distinct()
+            ->orderBy('polizas_id', 'asc')
             ->get();
 
 
