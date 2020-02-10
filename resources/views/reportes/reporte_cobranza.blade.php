@@ -143,7 +143,26 @@ footer{
                 <tr>
                     <td align="center">
                         <h3>CLÍNICA OLI-DENT S.R.L de C.V.</h3>
-                        <p>{{$pagos[0]->name}} - {{$pagos[0]->ruta}}</p>
+                        <p>
+                        @if ($cobro_id!='')
+                            @if (count($pagos)>0)
+                            {{$pagos[0]->cobrador}} 
+                            @endif
+                            @else
+                            Todos los Cobradores 
+                        @endif
+                        -
+                         @if ($rutas_id!='')
+                            @if (count($pagos)>0)
+                             {{$pagos[0]->ruta}}
+                            @endif
+                            @else
+                             Todas las Rutas
+                        @endif
+                        </p>
+
+
+
                         <p><strong>Reporte de Cobranza Del: {{(fecha_abr($fecha_inicio))}} al {{(fecha_abr($fecha_fin))}}</strong></p>
                         <p>Actualizado para el día {{fechahora_completa()}}.</p>
                     </td>

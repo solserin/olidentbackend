@@ -431,7 +431,7 @@ class VentasController extends ApiController
             // segundo parametro
             Storage::disk('images_base64')->put($img_name, $img);
             $file = storage_path('app/images_base64/' . $img_name);
-            $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa', 'cobro_id', 'file', 'total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
+            $pdf = PDF::loadView('reportes/reporte_cobranza', compact('empresa', 'cobro_id', 'rutas_id', 'file', 'total_ruta', 'pagos', 'fecha_inicio', 'fecha_fin'))->setPaper('a4', 'portrait');
             return $pdf->stream('archivo.pdf');
         }
     }
