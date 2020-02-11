@@ -445,7 +445,7 @@ class VentasController extends ApiController
         $polizas = Polizas::select('polizas.id', 'num_poliza', 'rutas_id', 'ruta', 'name')
             ->with(
                 array('ventas' => function ($query) {
-                    $query->select('ventas.polizas_id', 'ventas.id', 'nombre', 'total', 'abonado', 'restante', 'fecha_venta', 'fecha_vencimiento', 'ventas.status')
+                    $query->select('ventas.polizas_id', 'ventas.id', 'nombre', 'total', 'abonado', 'restante', 'fecha_venta', 'fecha_vencimiento', 'ventas.status', 'beneficiarios.telefono as tel')
                         ->join('beneficiarios', 'beneficiarios.polizas_id', '=', 'ventas.polizas_id')
                         ->where('beneficiarios.tipo_beneficiarios_id', '=', '1')
                         ->orderBy('ventas.id', 'desc');
@@ -529,6 +529,15 @@ class VentasController extends ApiController
                 ]
             ];
 
+            $estilos_pagados = [
+                'font' => [
+                    'bold' => true,
+                    'color' => [
+                        'argb' => 'FFA500'
+                    ]
+                ]
+            ];
+
 
             $spreadsheet->getActiveSheet()->getStyle('A1' . ':F3')->applyFromArray($estilo_header);
             $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
@@ -547,7 +556,7 @@ class VentasController extends ApiController
 
             $sheet->setCellValue('A' . $inicio_headers, 'Póliza');
             $sheet->setCellValue('B' . $inicio_headers, 'Fecha Venta');
-            $sheet->setCellValue('C' . $inicio_headers, 'Titular');
+            $sheet->setCellValue('C' . $inicio_headers, 'Titular / Tel');
             $sheet->setCellValue('D' . $inicio_headers, 'Importe');
             $sheet->setCellValue('E' . $inicio_headers, 'Pagado');
             $sheet->setCellValue('F' . $inicio_headers, 'Saldo');
@@ -584,7 +593,7 @@ class VentasController extends ApiController
                 $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($alineacion);
                 $sheet->setCellValue('A' . $inicio_headers, $poliza->num_poliza);
                 $sheet->setCellValue('B' . $inicio_headers, $poliza->ventas[0]->fecha_venta);
-                $sheet->setCellValue('C' . $inicio_headers, $poliza->ventas[0]->nombre);
+                $sheet->setCellValue('C' . $inicio_headers, $poliza->ventas[0]->nombre . ' / ' . $poliza->ventas[0]->tel);
                 $sheet->setCellValue('D' . $inicio_headers, $poliza->ventas[0]->total);
                 $spreadsheet->getActiveSheet()->getStyle('D' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
                     [
@@ -601,6 +610,23 @@ class VentasController extends ApiController
                         $estilo_cancelados
                     );
                 }
+
+                //aplico estilos para los pagados
+                if ($poliza->ventas[0]->restante == 0) {
+                    /**calculo total cancelado y total restante */
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                        $estilos_pagados
+                    );
+                }
+
+                //aplico estilos para vencidos y renovar
+                if ($poliza->ventas[0]->fecha_vencimiento <= Carbon::now()->format('Y-m-d H:i:s')) {
+                    /**calculo total cancelado y total restante */
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                        $estilo_cancelados
+                    );
+                }
+
 
                 $sheet->setCellValue('E' . $inicio_headers, $poliza->ventas[0]->abonado);
                 $sheet->setCellValue('F' . $inicio_headers, $poliza->ventas[0]->restante);
