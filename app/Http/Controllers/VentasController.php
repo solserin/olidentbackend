@@ -539,12 +539,12 @@ class VentasController extends ApiController
             ];
 
 
-            $spreadsheet->getActiveSheet()->getStyle('A1' . ':F3')->applyFromArray($estilo_header);
-            $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
+            $spreadsheet->getActiveSheet()->getStyle('A1' . ':G3')->applyFromArray($estilo_header);
+            $spreadsheet->getActiveSheet()->mergeCells('A1:G1');
             $sheet->setCellValue('A1', 'CLÍNICA OLI-DENT S.R.L de C.V.');
-            $spreadsheet->getActiveSheet()->mergeCells('A2:F2');
+            $spreadsheet->getActiveSheet()->mergeCells('A2:G2');
             $sheet->setCellValue('A2', strtoupper($polizas[0]->name . '-' . $polizas[0]->ruta));
-            $spreadsheet->getActiveSheet()->mergeCells('A3:F3');
+            $spreadsheet->getActiveSheet()->mergeCells('A3:G3');
             $sheet->setCellValue('A3', strtoupper('Actualizado para el día ' . fechahora_completa()));
             //fin header datos de la empresa
 
@@ -552,14 +552,15 @@ class VentasController extends ApiController
             $header_inicio = $inicio_headers + 1;
 
 
-            $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($estilo_header);
+            $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray($estilo_header);
 
             $sheet->setCellValue('A' . $inicio_headers, 'Póliza');
             $sheet->setCellValue('B' . $inicio_headers, 'Fecha Venta');
-            $sheet->setCellValue('C' . $inicio_headers, 'Titular / Tel');
-            $sheet->setCellValue('D' . $inicio_headers, 'Importe');
-            $sheet->setCellValue('E' . $inicio_headers, 'Pagado');
-            $sheet->setCellValue('F' . $inicio_headers, 'Saldo');
+            $sheet->setCellValue('C' . $inicio_headers, 'Titular');
+            $sheet->setCellValue('D' . $inicio_headers, 'Teléfono');
+            $sheet->setCellValue('E' . $inicio_headers, 'Importe');
+            $sheet->setCellValue('F' . $inicio_headers, 'Pagado');
+            $sheet->setCellValue('G' . $inicio_headers, 'Saldo');
 
             //escribiendo los datos
             $estilo_stripping = [
@@ -590,12 +591,13 @@ class VentasController extends ApiController
             $restante = 0;
             foreach ($polizas as $poliza) {
 
-                $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($alineacion);
+                $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray($alineacion);
                 $sheet->setCellValue('A' . $inicio_headers, $poliza->num_poliza);
                 $sheet->setCellValue('B' . $inicio_headers, $poliza->ventas[0]->fecha_venta);
-                $sheet->setCellValue('C' . $inicio_headers, $poliza->ventas[0]->nombre . ' / ' . $poliza->ventas[0]->tel);
-                $sheet->setCellValue('D' . $inicio_headers, $poliza->ventas[0]->total);
-                $spreadsheet->getActiveSheet()->getStyle('D' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                $sheet->setCellValue('C' . $inicio_headers, $poliza->ventas[0]->nombre);
+                $sheet->setCellValue('D' . $inicio_headers, $poliza->ventas[0]->tel);
+                $sheet->setCellValue('E' . $inicio_headers, $poliza->ventas[0]->total);
+                $spreadsheet->getActiveSheet()->getStyle('E' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray(
                     [
                         'numberFormat' => [
                             'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
@@ -606,7 +608,7 @@ class VentasController extends ApiController
                     /**calculo total cancelado y total restante */
                     $cancelado_total += $poliza->ventas[0]->total;
                     $restante = $poliza->ventas[0]->restante;
-                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray(
                         $estilo_cancelados
                     );
                 }
@@ -614,7 +616,7 @@ class VentasController extends ApiController
                 //aplico estilos para los pagados
                 if ($poliza->ventas[0]->restante == 0) {
                     /**calculo total cancelado y total restante */
-                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray(
                         $estilos_pagados
                     );
                 }
@@ -622,52 +624,52 @@ class VentasController extends ApiController
                 //aplico estilos para vencidos y renovar
                 if ($poliza->ventas[0]->fecha_vencimiento <= Carbon::now()->format('Y-m-d H:i:s')) {
                     /**calculo total cancelado y total restante */
-                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray(
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray(
                         $estilo_cancelados
                     );
                 }
 
 
-                $sheet->setCellValue('E' . $inicio_headers, $poliza->ventas[0]->abonado);
-                $sheet->setCellValue('F' . $inicio_headers, $poliza->ventas[0]->restante);
+                $sheet->setCellValue('F' . $inicio_headers, $poliza->ventas[0]->abonado);
+                $sheet->setCellValue('G' . $inicio_headers, $poliza->ventas[0]->restante);
                 $inicio_headers += 1;
 
                 if (($inicio_headers % 2) == 1) {
-                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':F' . $inicio_headers)->applyFromArray($estilo_stripping);
+                    $spreadsheet->getActiveSheet()->getStyle('A' . $inicio_headers . ':G' . $inicio_headers)->applyFromArray($estilo_stripping);
                 }
             }
 
 
             //totales y resumen en el header y footer
-            $spreadsheet->getActiveSheet()->getStyle('D' . ($inicio_headers + 1) . ':F' . ($inicio_headers + 1))->applyFromArray($estilo_stripping);
-            $spreadsheet->getActiveSheet()->getStyle('D' . ($inicio_headers + 2) . ':F' . ($inicio_headers + 2))->applyFromArray($estilo_stripping);
-            $spreadsheet->getActiveSheet()->getStyle('D' . ($inicio_headers + 3) . ':F' . ($inicio_headers + 3))->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('E' . ($inicio_headers + 1) . ':G' . ($inicio_headers + 1))->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('E' . ($inicio_headers + 2) . ':G' . ($inicio_headers + 2))->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('E' . ($inicio_headers + 3) . ':G' . ($inicio_headers + 3))->applyFromArray($estilo_stripping);
 
-            $spreadsheet->getActiveSheet()->mergeCells('D' . ($inicio_headers + 1) . ':E' . ($inicio_headers + 1));
-            $spreadsheet->getActiveSheet()->mergeCells('D' . ($inicio_headers + 2) . ':E' . ($inicio_headers + 2));
-            $spreadsheet->getActiveSheet()->mergeCells('D' . ($inicio_headers + 3) . ':E' . ($inicio_headers + 3));
+            $spreadsheet->getActiveSheet()->mergeCells('E' . ($inicio_headers + 1) . ':F' . ($inicio_headers + 1));
+            $spreadsheet->getActiveSheet()->mergeCells('E' . ($inicio_headers + 2) . ':F' . ($inicio_headers + 2));
+            $spreadsheet->getActiveSheet()->mergeCells('E' . ($inicio_headers + 3) . ':F' . ($inicio_headers + 3));
 
-            $sheet->setCellValue('D' . ($inicio_headers + 1), strtoupper('VALOR DE LA RUTA: '));
-            $spreadsheet->getActiveSheet()->getStyle('F' . ($inicio_headers + 1))->applyFromArray(
+            $sheet->setCellValue('E' . ($inicio_headers + 1), strtoupper('VALOR DE LA RUTA: '));
+            $spreadsheet->getActiveSheet()->getStyle('G' . ($inicio_headers + 1))->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
                     ],
                 ]
             );
-            $sheet->setCellValue('F' . ($inicio_headers + 1), '=SUM(D' . $header_inicio . ':D' . ($inicio_headers - 1) . ')-' . ($cancelado_total));
-            $sheet->setCellValue('D' . ($inicio_headers + 2), strtoupper('COBRADO: '));
-            $sheet->setCellValue('F' . ($inicio_headers + 2), '=SUM(E' . $header_inicio . ':E' . ($inicio_headers - 1) . ')');
-            $spreadsheet->getActiveSheet()->getStyle('F' . ($inicio_headers + 2))->applyFromArray(
+            $sheet->setCellValue('G' . ($inicio_headers + 1), '=SUM(E' . $header_inicio . ':E' . ($inicio_headers - 1) . ')-' . ($cancelado_total));
+            $sheet->setCellValue('E' . ($inicio_headers + 2), strtoupper('COBRADO: '));
+            $sheet->setCellValue('G' . ($inicio_headers + 2), '=SUM(F' . $header_inicio . ':F' . ($inicio_headers - 1) . ')');
+            $spreadsheet->getActiveSheet()->getStyle('G' . ($inicio_headers + 2))->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
                     ],
                 ]
             );
-            $sheet->setCellValue('D' . ($inicio_headers + 3), strtoupper('RESTANTE: '));
-            $sheet->setCellValue('F' . ($inicio_headers + 3), '=SUM(F' . $header_inicio . ':F' . ($inicio_headers - 1) . ')-' . ($restante));
-            $spreadsheet->getActiveSheet()->getStyle('F' . ($inicio_headers + 3))->applyFromArray(
+            $sheet->setCellValue('E' . ($inicio_headers + 3), strtoupper('RESTANTE: '));
+            $sheet->setCellValue('G' . ($inicio_headers + 3), '=SUM(G' . $header_inicio . ':G' . ($inicio_headers - 1) . ')-' . ($restante));
+            $spreadsheet->getActiveSheet()->getStyle('G' . ($inicio_headers + 3))->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
@@ -676,39 +678,41 @@ class VentasController extends ApiController
             );
             //fin en el footer
             //incio del header
-            $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray($estilo_stripping);
-            $spreadsheet->getActiveSheet()->getStyle('D5:F5')->applyFromArray(
+            $spreadsheet->getActiveSheet()->getStyle('E5:G5')->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('E5:G5')->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
                     ],
                 ]
             );
-            $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray($estilo_stripping);
-            $spreadsheet->getActiveSheet()->getStyle('D6:F6')->applyFromArray(
+            $spreadsheet->getActiveSheet()->getStyle('E6:G6')->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('E6:G6')->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
                     ],
                 ]
             );
-            $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray($estilo_stripping);
-            $spreadsheet->getActiveSheet()->getStyle('D7:F7')->applyFromArray(
+            $spreadsheet->getActiveSheet()->getStyle('E7:G7')->applyFromArray($estilo_stripping);
+            $spreadsheet->getActiveSheet()->getStyle('E7:G7')->applyFromArray(
                 [
                     'numberFormat' => [
                         'formatCode' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
                     ],
                 ]
             );
-            $spreadsheet->getActiveSheet()->mergeCells('D5:E5');
-            $sheet->setCellValue('D5', strtoupper('VALOR DE LA RUTA: '));
-            $sheet->setCellValue('F5', '=F' . ($inicio_headers + 1));
-            $spreadsheet->getActiveSheet()->mergeCells('D6:E6');
-            $sheet->setCellValue('F6', '=F' . ($inicio_headers + 2));
-            $sheet->setCellValue('D6', strtoupper('COBRADO: '));
-            $spreadsheet->getActiveSheet()->mergeCells('D7:E7');
-            $sheet->setCellValue('F7', '=F' . ($inicio_headers + 3));
-            $sheet->setCellValue('D7', strtoupper('RESTANTE: '));
+            $spreadsheet->getActiveSheet()->mergeCells('E5:F5');
+            $sheet->setCellValue('E5', strtoupper('VALOR DE LA RUTA: '));
+            $sheet->setCellValue('G5', '=G' . ($inicio_headers + 1));
+
+            $spreadsheet->getActiveSheet()->mergeCells('E6:F6');
+            $sheet->setCellValue('G6', '=G' . ($inicio_headers + 2));
+            $sheet->setCellValue('E6', strtoupper('COBRADO: '));
+
+            $spreadsheet->getActiveSheet()->mergeCells('E7:F7');
+            $sheet->setCellValue('G7', '=G' . ($inicio_headers + 3));
+            $sheet->setCellValue('E7', strtoupper('RESTANTE: '));
             //fin de totales y resumen
 
 
