@@ -437,6 +437,92 @@ class VentasController extends ApiController
     }
 
 
+
+    //REPORTES CIERRE DE COBRANZA
+    public function reporte_cierre_cobranza()
+    {
+        $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
+
+        //datos para obtener los resultados
+        $fecha_inicio = Input::get('fecha_inicio');
+        $fecha_fin = Input::get('fecha_fin');
+        $rutas_id = Input::get('rutas_id');
+        $ruta = DB::table('rutas')
+            ->join('users', 'users.id', '=', 'rutas.cobrador_id')
+            ->where('rutas.id', $rutas_id)
+            ->select('ruta', 'name')
+            ->get()->toArray();
+        $pagos = Abonos::select(
+            'fecha_abono as fab',
+            /**TOTAL DE POLIZAS*/
+            DB::raw("(select @total_polizas:=(count(polizas.num_poliza)) from polizas join ventas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ventas.fecha_venta<=fab) as total_polizas"),
+            /**POLIZAS ABONADAS */
+            DB::raw("(select @polizas_abonadas:=(count(abonos.id)) from abonos join ventas on ventas.id=abonos.ventas_id join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and abonos.fecha_abono=fab) as polizas_abonadas"),
+            /**POLIZAS NO ABONADAS */
+            DB::raw("(select @no_abonadas:=if((@total_polizas-polizas_abonadas)>0,@total_polizas-polizas_abonadas,0)) as no_abonadas"),
+            /**TOTAL DE POLIZAS CANCELADAS*/
+            DB::raw("(select @polizas_canceladas:=(count(ventas.id)) from ventas join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ventas.fecha_cancelacion=fab) as polizas_canceladas"),
+            /**TOTAL DE POLIZAS PAGADAS*/
+            DB::raw("(
+            select @polizas_pagadas:=count(distinct(polizas_id)) from ventas 
+            join polizas on ventas.polizas_id=polizas.num_poliza 
+            join abonos on ventas.id=abonos.ventas_id 
+            where polizas.rutas_id=$rutas_id 
+            and 
+            ventas.restante=0
+            and 
+            ventas.status=1
+            and
+            (select max(fecha_abono) from abonos where ventas_id=ventas.id and abonos.status=1)=fab
+             and
+            (select count(id) from abonos where ventas_id=ventas.id and abonos.status=1)>1
+            )
+            as polizas_pagadas"),
+            /**POLIZAS ACTIVAS*/
+            DB::raw("(select @activas:=if((@total_polizas-polizas_canceladas-@polizas_pagadas)>0,@total_polizas-polizas_canceladas-@polizas_pagadas,0)) as activas"),
+            /**TOTAL COBRANZA DEL DIA */
+            DB::raw("(select @cobranza_dia:=if((sum(abonos.cantidad))>0,sum(abonos.cantidad),0) from abonos join ventas on ventas.id=abonos.ventas_id join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and abonos.fecha_abono=fab and abonos.status=1) as cobranza_dia"),
+            /**COMISION COBRANZA*/
+            DB::raw("(select @comision:=if((@cobranza_dia)>0,(@cobranza_dia*.1),0)) as comision"),
+            /**COBORO A ENTREGAR*/
+            DB::raw("(select @cobro_entregar:=if((@comision)>0,(@cobranza_dia-@comision),0)) as cobro_entregar"),
+        )
+            ->whereBetween('fecha_abono', [$fecha_inicio, $fecha_fin])
+            ->where(function ($q) use ($rutas_id) {
+                if ($rutas_id != "") {
+                    $q->where('rutas.id', $rutas_id);
+                }
+            })
+            ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
+            ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
+            ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
+
+            ->where('abonos.status', '=', 1)
+            ->orderBy('abonos.fecha_abono', 'asc')
+            ->distinct()
+            ->get();
+        //si no lo esta mandando imprimir retorna el json
+        if (!Input::get('imprimir')) {
+            //retorna el json
+            return $pagos;
+        } else {
+            //si se va imprimir
+            $img = getB64Image($empresa[0]->logo);
+            // Obtener la extensión de la Imagen
+            $img_extension = getB64Extension($empresa[0]->logo);
+            // Crear un nombre aleatorio para la imagen
+            $img_name = 'logo' . time() . '.' . $img_extension;
+            // Usando el Storage guardar en el disco creado anteriormente y pasandole a
+            // la función "put" el nombre de la imagen y los datos de la imagen como
+            // segundo parametro
+            Storage::disk('images_base64')->put($img_name, $img);
+            $file = storage_path('app/images_base64/' . $img_name);
+            $pdf = PDF::loadView('reportes/reporte_cierre_cobranza', compact('empresa', 'rutas_id', 'file', 'pagos', 'fecha_inicio', 'fecha_fin', 'ruta'))->setPaper('a4', 'portrait');
+            return $pdf->stream('archivo.pdf');
+        }
+    }
+
+
     public function ruta_completa()
     {
         $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();

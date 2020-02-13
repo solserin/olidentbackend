@@ -28,7 +28,7 @@ Route::put('usuarios/update_perfil/{user}', 'User\UserController@update_perfil')
 
 //regresa los vendedores
 Route::get('usuarios/vendedores', 'User\UserController@vendedores');
-Route::resource('usuarios', 'User\UserController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('usuarios', 'User\UserController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 
 //rutas de roles
@@ -36,49 +36,49 @@ Route::resource('usuarios', 'User\UserController',['only'=>['index','show','stor
 Route::get('roles_reporte', 'User\RolesController@get_reporte_roles');
 //obtengo la lista de roles
 Route::get('roles/get_roles', 'User\RolesController@get_roles');
-Route::resource('roles', 'User\RolesController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('roles', 'User\RolesController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 
 
 //rutas de permisos
-Route::resource('permisos', 'User\PermisosController',['only'=>['index','show','store']]);
+Route::resource('permisos', 'User\PermisosController', ['only' => ['index', 'show', 'store']]);
 
 
 //rutas de empresas
-Route::resource('empresas', 'EmpresasController',['only'=>['show','update']]);
+Route::resource('empresas', 'EmpresasController', ['only' => ['show', 'update']]);
 
 //rutas de modulos
-Route::resource('modulos', 'User\ModulosController',['only'=>['index','show','destroy']]);
+Route::resource('modulos', 'User\ModulosController', ['only' => ['index', 'show', 'destroy']]);
 
 
 
 
 //rutas de servicios
 Route::get('servicios/servicios_reporte', 'ServiciosController@get_reporte_servicios');
-Route::resource('servicios', 'ServiciosController',['only'=>['index','store','show','update','destroy']]);
+Route::resource('servicios', 'ServiciosController', ['only' => ['index', 'store', 'show', 'update', 'destroy']]);
 
 //rutas de tipos de servicios
 Route::get('tipos_servicios/get_tipos', 'TipoServiciosController@get_tipos');
-Route::resource('tipos_servicios', 'TipoServiciosController',['only'=>['index','show','store','destroy','update']]);
+Route::resource('tipos_servicios', 'TipoServiciosController', ['only' => ['index', 'show', 'store', 'destroy', 'update']]);
 
 
 //rutas de tipos de precio
-Route::resource('tipo_precios', 'TipoPreciosController',['only'=>['index']]);
+Route::resource('tipo_precios', 'TipoPreciosController', ['only' => ['index']]);
 
 
 //grupos de vendedores
 Route::get('grupos_vendedores/get_agregar_modificar_lista', 'GruposVendedoresController@get_agregar_modificar_lista');
-Route::resource('grupos_vendedores', 'GruposVendedoresController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('grupos_vendedores', 'GruposVendedoresController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 //rutas
 Route::get('rutas/get_cobradores', 'RutasController@get_cobradores');
 Route::get('rutas/get_rutas_disponibles', 'RutasController@get_rutas_disponibles');
 //filtrar localidades
 Route::get('rutas/localidad', 'RutasController@localidad');
-Route::resource('rutas', 'RutasController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('rutas', 'RutasController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 //tipos de poliza
-Route::resource('tipos_polizas', 'TiposPolizasController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('tipos_polizas', 'TiposPolizasController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 //polizas
 Route::get('polizas/beneficiario', 'PolizasController@beneficiario');
@@ -90,7 +90,7 @@ Route::get('polizas/tarjeta_cobranza', 'PolizasController@tarjeta_cobranza');
 //ruta para descargar reporte de cobranza
 Route::post('polizas/reporte_grafica_cobranza', 'PolizasController@reporte_grafica_cobranza');
 
-Route::resource('polizas', 'PolizasController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('polizas', 'PolizasController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 //ventas
 Route::get('ventas/estado_cuenta/{id_venta}', 'VentasController@estado_cuenta');
@@ -100,13 +100,14 @@ Route::put('ventas/cancelar_pago/{pago_id}', 'VentasController@cancelar_pago');
 Route::get('ventas/reporte_especifico_pagos', 'VentasController@reporte_especifico_pagos');
 //ruta para descargar reporte de cobranza
 Route::get('ventas/reporte_cobranza', 'VentasController@reporte_cobranza');
+Route::get('ventas/reporte_cierre_cobranza', 'VentasController@reporte_cierre_cobranza');
 Route::get('ventas/ruta_completa', 'VentasController@ruta_completa');
 
 Route::get('ventas/reporte_venta', 'VentasController@reporte_venta');
 
 Route::get('excel', 'VentasController@excel');
 
-Route::resource('ventas', 'VentasController',['only'=>['index','show','store','update','destroy']]);
+Route::resource('ventas', 'VentasController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
 
 
 

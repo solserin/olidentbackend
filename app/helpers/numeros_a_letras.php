@@ -21,13 +21,7 @@
 function numeros_a_letras($numero, $moneda = 'PESO', $subfijo = 'M.N.')
 {
     $xarray = array(
-        0 => 'Cero'
-        , 1 => 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'
-        , 'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'
-        , 'VEINTI', 30 => 'TREINTA', 40 => 'CUARENTA', 50 => 'CINCUENTA'
-        , 60 => 'SESENTA', 70 => 'SETENTA', 80 => 'OCHENTA', 90 => 'NOVENTA'
-        , 100 => 'CIENTO', 200 => 'DOSCIENTOS', 300 => 'TRESCIENTOS', 400 => 'CUATROCIENTOS', 500 => 'QUINIENTOS'
-        , 600 => 'SEISCIENTOS', 700 => 'SETECIENTOS', 800 => 'OCHOCIENTOS', 900 => 'NOVECIENTOS'
+        0 => 'Cero', 1 => 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE', 'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE', 'VEINTI', 30 => 'TREINTA', 40 => 'CUARENTA', 50 => 'CINCUENTA', 60 => 'SESENTA', 70 => 'SETENTA', 80 => 'OCHENTA', 90 => 'NOVENTA', 100 => 'CIENTO', 200 => 'DOSCIENTOS', 300 => 'TRESCIENTOS', 400 => 'CUATROCIENTOS', 500 => 'QUINIENTOS', 600 => 'SEISCIENTOS', 700 => 'SETECIENTOS', 800 => 'OCHOCIENTOS', 900 => 'NOVECIENTOS'
     );
 
     $numero = trim($numero);
@@ -120,12 +114,12 @@ function numeros_a_letras($numero, $moneda = 'PESO', $subfijo = 'M.N.')
         } // ENDDO
         # si la cadena obtenida termina en MILLON o BILLON, entonces le agrega al final la conjuncion DE
         if ('ILLON' == substr(trim($xcadena), -5, 5)) {
-            $xcadena.= ' DE';
+            $xcadena .= ' DE';
         }
 
         # si la cadena obtenida en MILLONES o BILLONES, entonces le agrega al final la conjuncion DE
         if ('ILLONES' == substr(trim($xcadena), -7, 7)) {
-            $xcadena.= ' DE';
+            $xcadena .= ' DE';
         }
 
         # depurar leyendas finales
@@ -133,16 +127,16 @@ function numeros_a_letras($numero, $moneda = 'PESO', $subfijo = 'M.N.')
             switch ($xz) {
                 case 0:
                     if ('1' == trim(substr($XAUX, $xz * 6, 6))) {
-                        $xcadena.= 'UN BILLON ';
+                        $xcadena .= 'UN BILLON ';
                     } else {
-                        $xcadena.= ' BILLONES ';
+                        $xcadena .= ' BILLONES ';
                     }
                     break;
                 case 1:
                     if ('1' == trim(substr($XAUX, $xz * 6, 6))) {
-                        $xcadena.= 'UN MILLON ';
+                        $xcadena .= 'UN MILLON ';
                     } else {
-                        $xcadena.= ' MILLONES ';
+                        $xcadena .= ' MILLONES ';
                     }
                     break;
                 case 2:
@@ -153,7 +147,7 @@ function numeros_a_letras($numero, $moneda = 'PESO', $subfijo = 'M.N.')
                         $xcadena = "UN {$moneda} {$xdecimales}/100 {$subfijo}";
                     }
                     if ($numero >= 2) {
-                        $xcadena.= " {$moneda}S {$xdecimales}/100 {$subfijo}"; //
+                        $xcadena .= " {$moneda}S {$xdecimales}/100 {$subfijo}"; //
                     }
                     break;
             } // endswitch ($xz)
@@ -191,81 +185,120 @@ function subfijo($cifras)
 
 
 
- function fechahora_completa(){
-    $arrayMeses = array('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
+function fechahora_completa()
+{
+    $arrayMeses = array(
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    );
 
-   $arrayDias = array( 'Domingo', 'Lunes', 'Martes',
-       'Miercoles', 'Jueves', 'Viernes', 'Sabado');
-   return ($arrayDias[date('w')].", ".date('d')." de ".$arrayMeses[date('m')-1]." de ".date('Y').", " .date("h:i:s a"));
+    $arrayDias = array(
+        'Domingo', 'Lunes', 'Martes',
+        'Miercoles', 'Jueves', 'Viernes', 'Sabado'
+    );
+    return ($arrayDias[date('w')] . ", " . date('d') . " de " . $arrayMeses[date('m') - 1] . " de " . date('Y') . ", " . date("h:i:s a"));
 }
 
 
- function mes($mes){
-    $arrayMeses = array('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
-   return $arrayMeses[$mes-1];
-}
-
-
-
- function fechahora($fecha){
-    $arrayMeses = array('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
-
-   $arrayDias = array( 'Domingo', 'Lunes', 'Martes',
-       'Miercoles', 'Jueves', 'Viernes', 'Sabado');
-   return strtoupper(($arrayDias[date('w',strtotime($fecha))].", ".date('d',strtotime($fecha))." de ".$arrayMeses[date('m',strtotime($fecha))-1]." de ".date('Y',strtotime($fecha)).", " .date("h:i:s a",strtotime($fecha))));
-}
-
-
- function hora($fecha){
-   return date("h:i a",strtotime($fecha));
+function mes($mes)
+{
+    $arrayMeses = array(
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    );
+    return $arrayMeses[$mes - 1];
 }
 
 
 
+function fechahora($fecha)
+{
+    $arrayMeses = array(
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    );
 
- function fecha_only($fecha){
-    $arrayMeses = array('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
-   $arrayDias = array( 'Domingo', 'Lunes', 'Martes',
-       'Miercoles', 'Jueves', 'Viernes', 'Sabado');
-
-   return strtoupper(($arrayDias[date('w',strtotime($fecha))].", ".date('d',strtotime($fecha))." de ".$arrayMeses[date('m',strtotime($fecha))-1]." de ".date('Y',strtotime($fecha))));
+    $arrayDias = array(
+        'Domingo', 'Lunes', 'Martes',
+        'Miercoles', 'Jueves', 'Viernes', 'Sabado'
+    );
+    return strtoupper(($arrayDias[date('w', strtotime($fecha))] . ", " . date('d', strtotime($fecha)) . " de " . $arrayMeses[date('m', strtotime($fecha)) - 1] . " de " . date('Y', strtotime($fecha)) . ", " . date("h:i:s a", strtotime($fecha))));
 }
 
 
- function fecha_no_day($fecha){
-    $arrayMeses = array('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
-   return strtoupper(date('d',strtotime($fecha))." de ".$arrayMeses[date('m',strtotime($fecha))-1]." de ".date('Y',strtotime($fecha)));
-}
-
-function fecha_abr($fecha){
-    $arrayMeses = array('Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-   'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
-   return date('d',strtotime($fecha))."/".$arrayMeses[date('m',strtotime($fecha))-1]."/".date('Y',strtotime($fecha));
+function hora($fecha)
+{
+    return date("h:i a", strtotime($fecha));
 }
 
 
 
 
+function fecha_only($fecha)
+{
+    $arrayMeses = array(
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    );
+    $arrayDias = array(
+        'Domingo', 'Lunes', 'Martes',
+        'Miercoles', 'Jueves', 'Viernes', 'Sabado'
+    );
 
- function getB64Image($base64_image){  
+    return strtoupper(($arrayDias[date('w', strtotime($fecha))] . ", " . date('d', strtotime($fecha)) . " de " . $arrayMeses[date('m', strtotime($fecha)) - 1] . " de " . date('Y', strtotime($fecha))));
+}
+
+
+function fecha_no_day($fecha)
+{
+    $arrayMeses = array(
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    );
+    return strtoupper(date('d', strtotime($fecha)) . " de " . $arrayMeses[date('m', strtotime($fecha)) - 1] . " de " . date('Y', strtotime($fecha)));
+}
+
+function fecha_abr($fecha)
+{
+    $arrayMeses = array(
+        'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    );
+    return date('d', strtotime($fecha)) . "/" . $arrayMeses[date('m', strtotime($fecha)) - 1] . "/" . date('Y', strtotime($fecha));
+}
+
+function dia($fecha)
+{
+    $arrayDias = array(
+        'D', 'L', 'M',
+        'M', 'J', 'V', 'S'
+    );
+    return ($arrayDias[date('w', strtotime($fecha))]);
+}
+
+
+
+
+
+
+
+
+function getB64Image($base64_image)
+{
     // Obtener el String base-64 de los datos         
-    $image_service_str = substr($base64_image, strpos($base64_image, ",")+1);
+    $image_service_str = substr($base64_image, strpos($base64_image, ",") + 1);
     // Decodificar ese string y devolver los datos de la imagen        
-    $image = base64_decode($image_service_str);   
+    $image = base64_decode($image_service_str);
     // Retornamos el string decodificado
-    return $image; 
- }
+    return $image;
+}
 
-  function getB64Extension($base64_image, $full=null){  
+function getB64Extension($base64_image, $full = null)
+{
     // Obtener mediante una expresión regular la extensión imagen y guardarla
     // en la variable "img_extension"        
-    preg_match("/^data:image\/(.*);base64/i",$base64_image, $img_extension);   
+    preg_match("/^data:image\/(.*);base64/i", $base64_image, $img_extension);
     // Dependiendo si se pide la extensión completa o no retornar el arreglo con
     // los datos de la extensión en la posición 0 - 1
-    return ($full) ?  $img_extension[0] : $img_extension[1];  
-  }
+    return ($full) ?  $img_extension[0] : $img_extension[1];
+}

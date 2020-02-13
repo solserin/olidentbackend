@@ -231,7 +231,8 @@ footer{
                        <strong>{{number_format($cobrado_ruta,2,".",",")}}</strong>
                     </td>
                 </tr>
-                <tr>
+               @if ($rutas_id)
+                   <tr>
                     <td style="height:20px !important;" colspan="6" align="right">
                         <strong>($) Saldo restante de la ruta: </strong>
                     </td>
@@ -250,6 +251,7 @@ footer{
                        <strong>{{number_format($porcentaje_recuperado,2,".",",")}} %</strong>
                     </td>
                 </tr>
+               @endif
             </tbody>
           </table>
         @else
