@@ -343,13 +343,11 @@ class VentasController extends ApiController
             'total as total_venta',
             'abonado',
             'restante',
-
-
             /**NOMBRE DEL COBRADOR*/
             DB::raw("(select @cobrador:=(name) from users where id=abonos.cobrador_id) as cobrador"),
 
             /**ESTE ES EL ID DEL ENGANCHE DE LA VENTA*/
-            DB::raw("(select @enganche_id:=(abonos.id) from abonos where ventas_id=idVenta and status=1 order by fecha_abono,id asc limit 1) as enganche_id"),
+            DB::raw("(select @enganche_id:=(abonos.id) from abonos where ventas_id=idVenta and abonos.status=1 order by fecha_abono,id asc limit 1) as enganche_id"),
             /**ENGANCHE $*/
             DB::raw("(select @enganche:=(cantidad) from abonos where abonos.id=@enganche_id) as enganche"),
 
@@ -443,6 +441,8 @@ class VentasController extends ApiController
     {
         $empresa = DB::table('empresas')->where('id', 1)->get()->toArray();
 
+
+
         //datos para obtener los resultados
         $fecha_inicio = Input::get('fecha_inicio');
         $fecha_fin = Input::get('fecha_fin');
@@ -450,42 +450,69 @@ class VentasController extends ApiController
         $ruta = DB::table('rutas')
             ->join('users', 'users.id', '=', 'rutas.cobrador_id')
             ->where('rutas.id', $rutas_id)
-            ->select('ruta', 'name')
+            ->select('ruta', 'name', 'users.id as cobrador_id')
             ->get()->toArray();
+        $cobrador_id = $ruta[0]->cobrador_id;
+
+
+
         $pagos = Abonos::select(
             'fecha_abono as fab',
-            /**TOTAL DE POLIZAS*/
-            DB::raw("(select @total_polizas:=(count(polizas.num_poliza)) from polizas join ventas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ventas.fecha_venta<=fab) as total_polizas"),
-            /**POLIZAS ABONADAS */
-            DB::raw("(select @polizas_abonadas:=(count(abonos.id)) from abonos join ventas on ventas.id=abonos.ventas_id join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and abonos.fecha_abono=fab) as polizas_abonadas"),
-            /**POLIZAS NO ABONADAS */
-            DB::raw("(select @no_abonadas:=if((@total_polizas-polizas_abonadas)>0,@total_polizas-polizas_abonadas,0)) as no_abonadas"),
-            /**TOTAL DE POLIZAS CANCELADAS*/
-            DB::raw("(select @polizas_canceladas:=(count(ventas.id)) from ventas join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ventas.fecha_cancelacion=fab) as polizas_canceladas"),
+            'ventas_id as vid',
+            'abonos.id as aid',
+            'num_poliza',
             /**TOTAL DE POLIZAS PAGADAS*/
             DB::raw("(
-            select @polizas_pagadas:=count(distinct(polizas_id)) from ventas 
-            join polizas on ventas.polizas_id=polizas.num_poliza 
-            join abonos on ventas.id=abonos.ventas_id 
+            select @polizas_pagadas:=if(count(distinct(polizas_id))>0,count(distinct(polizas_id)),0) from ventas as ven 
+            join polizas on ven.polizas_id=polizas.num_poliza 
+            join abonos on ven.id=abonos.ventas_id 
             where polizas.rutas_id=$rutas_id 
             and 
-            ventas.restante=0
+            ven.restante=0
             and 
-            ventas.status=1
+            ven.status=1
             and
-            (select max(fecha_abono) from abonos where ventas_id=ventas.id and abonos.status=1)=fab
+            (select max(fecha_abono) from abonos where ventas_id=ven.id and abonos.status=1)=fab
              and
-            (select count(id) from abonos where ventas_id=ventas.id and abonos.status=1)>1
+            (select count(id) from abonos where ventas_id=ven.id and abonos.status=1)>1
             )
             as polizas_pagadas"),
+            /** polizas nuevas para la ruta */
+            DB::raw("(select @polizas_nuevas:=(count(ven.id)) from ventas as ven join polizas on ven.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ven.fecha_venta=fab and ven.status=1 and (select cantidad from abonos where ventas_id=ven.id and abonos.status=1 order by abonos.fecha_abono,abonos.id asc limit 1)<>ven.total) as polizas_nuevas"),
+            /**TOTAL DE POLIZAS CANCELADAS*/
+            DB::raw("(select @polizas_canceladas:=if((count(ventas.id)),(count(ventas.id)),0) from ventas join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ventas.fecha_cancelacion=fab) as polizas_canceladas"),
+            DB::raw("(select @poliza:=num_poliza from ventas join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and ventas.id=vid) as poliza"),
+            /**TOTAL DE POLIZAS*/
+            /**OBTENER ID DEL ENGANCHE PARA QUE NO LO TOME COMO COBRANZA */
+            DB::raw("(
+                select @total_polizas:=(count(distinct(polizas.num_poliza))-@polizas_nuevas) from polizas 
+                join ventas as ven on ven.polizas_id=polizas.num_poliza 
+                where polizas.rutas_id=$rutas_id and ven.fecha_venta<=fab 
+                and ven.restante>0 and ven.status=1
+                and (select cantidad from abonos where ventas_id=ven.id and abonos.status=1 order by abonos.fecha_abono,abonos.id asc limit 1)<>ven.total
+                ) as total_polizas"),
+            /**POLIZAS ABONADAS */
+            DB::raw("(select @polizas_abonadas:=(count(polizas.num_poliza)) from abonos as abo join ventas on ventas.id=abo.ventas_id join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and abo.fecha_abono=fab and abo.status=1 and cobrador_id=$cobrador_id and abo.id<>(SELECT id FROM abonos WHERE abonos.ventas_id=abo.ventas_id AND abonos.status=1 ORDER BY abonos.fecha_abono,id ASC LIMIT 1)) as polizas_abonadas"),
+            /**POLIZAS NO ABONADAS */
+            DB::raw("(select @no_abonadas:=if((@total_polizas-polizas_abonadas)>0,@total_polizas-polizas_abonadas,0)) as no_abonadas"),
+
             /**POLIZAS ACTIVAS*/
-            DB::raw("(select @activas:=if((@total_polizas-polizas_canceladas-@polizas_pagadas)>0,@total_polizas-polizas_canceladas-@polizas_pagadas,0)) as activas"),
+            //DB::raw("(select @activas:=if((@total_polizas-polizas_canceladas-@polizas_pagadas+@polizas_nuevas)>0,@total_polizas-polizas_canceladas-@polizas_pagadas+@polizas_nuevas,0)) as activas"),
+            /**OBTENER ID DEL ENGANCHE PARA QUE NO LO TOME COMO COBRANZA */
+            DB::raw("(
+                select @activas:=(count(distinct(polizas.num_poliza))) from polizas 
+                join ventas as ven on ven.polizas_id=polizas.num_poliza 
+                where polizas.rutas_id=$rutas_id and ven.fecha_venta<=fab 
+                and ven.restante>0 and ven.status=1
+                and (select cantidad from abonos where ventas_id=ven.id and abonos.status=1 order by abonos.fecha_abono,abonos.id asc limit 1)<>ven.total
+                ) as activas"),
+
             /**TOTAL COBRANZA DEL DIA */
-            DB::raw("(select @cobranza_dia:=if((sum(abonos.cantidad))>0,sum(abonos.cantidad),0) from abonos join ventas on ventas.id=abonos.ventas_id join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and abonos.fecha_abono=fab and abonos.status=1) as cobranza_dia"),
+            DB::raw("(select @cobranza_dia:=if((sum(abo.cantidad))>0,sum(abo.cantidad),0) from abonos as abo join ventas on ventas.id=abo.ventas_id join polizas on ventas.polizas_id=polizas.num_poliza where polizas.rutas_id=$rutas_id and abo.fecha_abono=fab and abo.status=1 and cobrador_id=$cobrador_id and abo.id<>(SELECT id FROM abonos WHERE abonos.ventas_id=abo.ventas_id AND abonos.status=1 ORDER BY abonos.fecha_abono,id ASC LIMIT 1)) as cobranza_dia"),
             /**COMISION COBRANZA*/
             DB::raw("(select @comision:=if((@cobranza_dia)>0,(@cobranza_dia*.1),0)) as comision"),
             /**COBORO A ENTREGAR*/
-            DB::raw("(select @cobro_entregar:=if((@comision)>0,(@cobranza_dia-@comision),0)) as cobro_entregar"),
+            DB::raw("(select @cobro_entregar:=if((@comision)>0,(@cobranza_dia-@comision),0)) as cobro_entregar")
         )
             ->whereBetween('fecha_abono', [$fecha_inicio, $fecha_fin])
             ->where(function ($q) use ($rutas_id) {
@@ -496,11 +523,11 @@ class VentasController extends ApiController
             ->join('ventas', 'abonos.ventas_id', '=', 'ventas.id')
             ->join('polizas', 'polizas.num_poliza', '=', 'ventas.polizas_id')
             ->join('rutas', 'polizas.rutas_id', '=', 'rutas.id')
-
             ->where('abonos.status', '=', 1)
             ->orderBy('abonos.fecha_abono', 'asc')
             ->distinct()
             ->get();
+
         //si no lo esta mandando imprimir retorna el json
         if (!Input::get('imprimir')) {
             //retorna el json
@@ -517,7 +544,7 @@ class VentasController extends ApiController
             // segundo parametro
             Storage::disk('images_base64')->put($img_name, $img);
             $file = storage_path('app/images_base64/' . $img_name);
-            $pdf = PDF::loadView('reportes/reporte_cierre_cobranza', compact('empresa', 'rutas_id', 'file', 'pagos', 'fecha_inicio', 'fecha_fin', 'ruta'))->setPaper('a4', 'portrait');
+            $pdf = PDF::loadView('reportes/reporte_cierre_cobranza', compact('empresa', 'rutas_id', 'file', 'pagos', 'fecha_inicio', 'fecha_fin', 'ruta'))->setPaper('a4', 'landscape');
             return $pdf->stream('archivo.pdf');
         }
     }

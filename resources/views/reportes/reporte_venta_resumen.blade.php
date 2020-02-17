@@ -145,7 +145,7 @@ footer{
                         <h3>CLÍNICA OLI-DENT S.R.L de C.V.</h3>
                         <p><strong>Reporte de Venta Del: {{(fecha_abr($fecha_inicio))}} al {{(fecha_abr($fecha_fin))}}</strong></p>
                         <p>Actualizado para el día {{fechahora_completa()}}.</p>
-                         @if ($ventas)
+                         @if (count($ventas)>0)
                             @if ($rutas_id)
                                 <p>Ruta: {{$ventas[0]->ruta}}</p>
                             @else

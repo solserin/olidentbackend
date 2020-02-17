@@ -116,7 +116,7 @@ footer {
        border-collapse: collapse;
     }
     #datos td,#datos th{ 
-    height: 54px;
+    height: 39px;
     border: 1px solid #1675ab; 
     };
 
@@ -158,7 +158,7 @@ footer{
     <footer>
         Pág. <span class="pagenum"></span>
     </footer>
-     @if ($pagos)
+     @if (count($pagos))
      <br>
           <table width="100%" id="datos">
             <thead style="background-color: #1675ab; color:#fff; font-size:10px;">
@@ -169,10 +169,12 @@ footer{
                 <th align="center">Pólizas no Abonadas</th>
                 <th align="center">Pólizas Pagadas</th>
                 <th align="center">Pólizas Canceladas</th>
+                <th align="center">Pólizas Nuevas</th>
                 <th align="center">Total Pólizas Activas</th>
                 <th align="center">Cobranza del Día</th>
                 <th align="center">Comisión 10%</th>
                 <th align="center">Cobro a Entregar</th>
+                <th align="center">Cobro Recibido en Ruta</th>
                 <th align="center">Faltante o Restante</th>
               </tr>
             </thead>
@@ -186,13 +188,22 @@ footer{
                     $no_abonadas=0;
                     $polizas_pagadas=0;
                     $polizas_canceladas=0;
+                    $polizas_nuevas=0;
                     $activas=0;
                     $cobranza_dia=0;
                     $comision=0;
                     $cobro_entregar=0;
-                    $x=1;
+                    $x=0;
+                    if($pagos){
+                        //se asgina el primero
+                         $fecha=$pagos[0]->fab;
+                    }
+
+                   
                 @endphp
+
                 @foreach ($pagos as $pago)
+                @if ($x==0)
                     <tr>
                        <td align="center"><strong>{{strtolower(dia($pago->fab))}}</strong></td>
                        <td align="center">{{$pago->total_polizas}}</td>
@@ -200,13 +211,17 @@ footer{
                        <td align="center">{{$pago->no_abonadas}}</td>
                        <td align="center">{{$pago->polizas_pagadas}}</td>
                        <td align="center">{{$pago->polizas_canceladas}}</td>
+                       <td align="center">{{$pago->polizas_nuevas}}</td>
                        <td align="center">{{$pago->activas}}</td>
                        <td align="center">{{number_format($pago->cobranza_dia,2,".",",")}}</td>
                        <td align="center">{{number_format($pago->comision,2,".",",")}}</td>
                        <td align="center">{{number_format($pago->cobro_entregar,2,".",",")}}</td>
                        <td></td>
+                       <td></td>
                     </tr>
                     @php
+                    $x++;
+                        $polizas_nuevas+=$pago->polizas_nuevas;
                         $total_polizas+=$pago->total_polizas;
                         $polizas_abonadas+=$pago->polizas_abonadas;
                         $polizas_pagadas+=$pago->polizas_pagadas;
@@ -216,9 +231,48 @@ footer{
                         $comision+=$pago->comision;
                         $cobro_entregar+=$pago->cobro_entregar;
                     @endphp
+    
+                    
+                    @else
+                    @if ($fecha!=$pago->fab)
+                    
+
+                        @php
+                            $fecha=$pago->fab;
+                        @endphp
+                        <tr>
+                        <td align="center"><strong>{{strtolower(dia($pago->fab))}}</strong></td>
+                        <td align="center">{{$pago->total_polizas}}</td>
+                        <td align="center">{{$pago->polizas_abonadas}}</td>
+                        <td align="center">{{$pago->no_abonadas}}</td>
+                        <td align="center">{{$pago->polizas_pagadas}}</td>
+                        <td align="center">{{$pago->polizas_canceladas}}</td>
+                        <td align="center">{{$pago->polizas_nuevas}}</td>
+                        <td align="center">{{$pago->activas}}</td>
+                        <td align="center">{{number_format($pago->cobranza_dia,2,".",",")}}</td>
+                        <td align="center">{{number_format($pago->comision,2,".",",")}}</td>
+                        <td align="center">{{number_format($pago->cobro_entregar,2,".",",")}}</td>
+                        <td></td>
+                        <td></td>
+                        </tr>
+                        @php
+                        $x+=1;
+                        $polizas_nuevas+=$pago->polizas_nuevas;
+                            $total_polizas+=$pago->total_polizas;
+                            $polizas_abonadas+=$pago->polizas_abonadas;
+                            $polizas_pagadas+=$pago->polizas_pagadas;
+                            $polizas_canceladas+=$pago->polizas_canceladas;
+                            $activas+=$pago->activas;
+                            $cobranza_dia+=$pago->cobranza_dia;
+                            $comision+=$pago->comision;
+                            $cobro_entregar+=$pago->cobro_entregar;
+                        @endphp
+        
+                    @endif
+                @endif
+                    
                 @endforeach
                 @php
-                $x+=1;
                 $total=count($pagos);
                 @endphp
                 <tr>
@@ -231,12 +285,19 @@ footer{
                            @endif
                         </strong></td>
                        <td align="center"><strong>{{$polizas_abonadas}}</strong></td>
-                       <td align="center"><strong>{{$no_abonadas}}</strong></td>
+                       <td align="center"><strong>
+                            @if ($pagos)
+                               {{$pagos[$total-1]->total_polizas-$polizas_abonadas}}
+                           @else
+                               0
+                           @endif
+                    </strong></td>
                        <td align="center"><strong>{{$polizas_pagadas}}</strong></td>
                        <td align="center"><strong>{{$polizas_canceladas}}</strong></td>
+                        <td align="center"><strong>{{$polizas_nuevas}}</strong></td>
                        <td align="center"><strong>
-                           @if ($pagos)
-                               {{$pagos[$total-1]->activas}}
+                            @if ($pagos)
+                               {{($pagos[$total-1]->total_polizas-$polizas_pagadas-$polizas_canceladas+$polizas_nuevas)}}
                            @else
                                0
                            @endif
@@ -245,9 +306,10 @@ footer{
                        <td align="center"><strong>{{number_format($comision,2,".",",")}}</strong></td>
                        <td align="center"><strong>{{number_format($cobro_entregar,2,".",",")}}</strong></td>
                        <td></td>
+                       <td></td>
                     </tr>
                     <tr>
-                        <td colspan="11">
+                        <td colspan="13">
                             <p>OBSERVACIÓN:</p>
                             <br><br><br><br><br><br>
                             <table width="100%">
